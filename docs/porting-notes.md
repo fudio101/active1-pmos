@@ -43,3 +43,8 @@
 - WiFi: wlan0 works (scans 2.4+5GHz, connected to LAN with internet).
 - Fix: device package now depends on firmware-xiaomi-jasmine_sprout (WCN3990 board-2.bin).
 - Remaining: per-device WiFi MAC (currently random); avoid 'press power' on reboot (AVB).
+
+## UPDATE: GPU working (2026-06-14)
+- Mesa freedreno reports FD512 (hardware accel, not llvmpipe).
+- Fix: a512_zap.mbn (Adreno 512 zap shader, extracted from stock vendor_a/firmware/a512_zap.elf) added to firmware-vsmart-zangyapro.
+- Cosmetic: a530_pm4.fw early-load warning at boot (deferred fallback succeeds).

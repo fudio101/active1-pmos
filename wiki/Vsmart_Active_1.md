@@ -52,7 +52,7 @@ The Vsmart Active 1 is a rebrand of the **BQ Aquaris X2 Pro** and is very close 
 | WiFi (WCN3990) | Works |
 | Bluetooth (WCN3990) | Works |
 | Modem (calls/SMS/data) | Untested |
-| GPU (Adreno 512) | Untested |
+| GPU (Adreno 512, freedreno FD512) | Works |
 
 ## Unlocking the bootloader
 
