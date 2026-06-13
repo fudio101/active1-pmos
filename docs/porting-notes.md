@@ -48,3 +48,31 @@
 - Mesa freedreno reports FD512 (hardware accel, not llvmpipe).
 - Fix: a512_zap.mbn (Adreno 512 zap shader, extracted from stock vendor_a/firmware/a512_zap.elf) added to firmware-vsmart-zangyapro.
 - Cosmetic: a530_pm4.fw early-load warning at boot (deferred fallback succeeds).
+
+## UPDATE: GPU render confirmed via benchmark (2026-06-14)
+- glmark2-es2-drm (real GPU submit to panel): GL_RENDERER=FD512, Mesa 26.1.1 (GLES 3.1).
+  build 677 FPS, texture 413 FPS, shading 451 FPS, **glmark2 Score: 512** (hardware, not llvmpipe).
+- Headless: EGL_PLATFORM=surfaceless and =device both report freedreno/FD512, so the GPU is
+  usable without a display (renderD128) for any future Wayland compositor.
+
+## KNOWN ISSUE: unattended/soft reboot hangs (NOT yet fixed)
+Symptom: `reboot` (or any soft reboot) -> bootloader -> pmOS splash -> black screen -> hang;
+never reaches SSH. Only recovery is hold-Power (force power-off) then power on (cold boot).
+Cold boot from power button always works. Blocks fully-headless reboots.
+
+Investigation (2026-06-14):
+- Restart handler: PSCI (prio 129) wins over PS_HOLD/msm-poweroff (prio 128).
+- Root-cause candidate: PMIC pm660 PON PS_HOLD reset type was WARM_RESET (reg 0x85a=0x01).
+  A warm reset restarts the CPUs but does NOT power-cycle peripherals (eMMC, remoteprocs,
+  SMMU), so the 2nd boot hangs on dirty hardware. Cold boot power-cycles everything -> clean.
+- Tried fix (REVERTED, did not work): patched qcom-pon.c to set PS_HOLD reset type =
+  HARD_RESET (0x85a=0x07, confirmed active via regmap debugfs + dmesg "PS_HOLD configured for
+  hard reset") and bumped msm-poweroff restart priority 128->130 so PS_HOLD beats PSCI.
+  Even with hard reset active, `reboot` still hung -> so the warm-vs-hard reset type is NOT
+  the (only) cause. Reverted both kernel edits.
+- Next ideas to try: (a) verbose boot image (drop `quiet splash`, add `ignore_loglevel`) and
+  photograph the panel at the hang to localize the stuck driver; (b) suspect eMMC/sdhci or a
+  remoteproc not re-initialising on the 2nd boot; (c) check whether the bootloader takes a
+  different path on a warm boot. ramoops (ramoops@a0000000) is wiped by the forced cold boot,
+  so it cannot capture the hang.
+Workaround for now: treat as a cold-boot-only device; avoid soft reboots.

@@ -52,7 +52,8 @@ The Vsmart Active 1 is a rebrand of the **BQ Aquaris X2 Pro** and is very close 
 | WiFi (WCN3990) | Works |
 | Bluetooth (WCN3990) | Works |
 | Modem (calls/SMS/data) | Untested |
-| GPU (Adreno 512, freedreno FD512) | Works |
+| GPU (Adreno 512, freedreno FD512) | Works (glmark2 score 512, 3D renders on panel) |
+| Soft / unattended reboot | Broken (cold-boot only, see Known issues) |
 
 ## Unlocking the bootloader
 
@@ -85,12 +86,32 @@ To test without flashing: `pmbootstrap flasher boot` (or `fastboot boot boot.img
 
 ## Mainline status
 
-**Working:** CPU/SMP, eMMC (HS400), USB (gadget networking), framebuffer console, fastboot boot.
+**Working:** CPU/SMP, eMMC (HS400), USB (gadget networking), framebuffer console, fastboot
+boot, WiFi + Bluetooth (WCN3990), GPU (Adreno 512 via freedreno — glmark2 score 512, renders
+3D on the panel and works headless via the render node).
 
 **Partial:** charging (enabled by PMIC by default; battery reporting WIP).
 
-**Not working / WIP:** DRM panel (HX83112A node not yet added), touchscreen (Himax in-cell;
-no good mainline driver), WiFi/BT (WCN3990 firmware/calibration), modem, GPU.
+**Not working / WIP:** DRM panel node (HX83112A not yet added — console uses the bootloader
+framebuffer), touchscreen (Himax in-cell; no good mainline driver), modem, soft reboot.
+
+## Known issues
+
+### Soft / unattended reboot hangs (cold-boot only)
+
+`reboot` (or any software-initiated reboot) restarts into the bootloader and the pmOS splash,
+then the screen goes black and the boot hangs before SSH comes up. The only recovery is to
+hold **Power** to force the device off and then power it on again (a cold boot), which always
+works. This makes the device effectively **cold-boot-only** and blocks fully-headless reboots.
+
+Diagnosis so far: a soft reboot performs a *warm* reset (CPUs restart but peripherals — eMMC,
+remoteprocs, SMMU — keep their previous state), and the second boot hangs on that dirty
+hardware; a real power cycle clears it. Forcing the PMIC (pm660) PON `PS_HOLD` reset type from
+WARM_RESET to HARD_RESET (and making PS_HOLD outrank the PSCI restart handler) was tried and
+**did not** fix it, so the reset *type* is not the (only) cause. `ramoops` is wiped by the
+forced cold boot, so the hang is not captured. Next step: boot a verbose image (drop
+`quiet splash`, add `ignore_loglevel`) and read the panel at the hang to localise the stuck
+driver. See `docs/porting-notes.md` for the full write-up.
 
 ## Notes
 
