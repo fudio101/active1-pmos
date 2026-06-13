@@ -21,6 +21,33 @@ sudo ip addr add 172.16.42.2/24 dev <iface>
 sudo ip link set <iface> up
 ```
 
+### Finding the phone's IP over USB (no WiFi yet)
+The phone's USB-gadget address is **fixed at `172.16.42.1`** — that is always the phone, so
+in practice you do not need to "discover" it, just use it. To *confirm* the link is up:
+
+```sh
+# Linux / macOS / WSL host:
+ip -4 addr | grep -B2 172.16.42        # which host iface is on the 172.16.42.x subnet
+ip route | grep 172.16.42              # route to the phone's subnet
+ping -c2 172.16.42.1                   # reachable?
+ip neigh | grep 172.16.42.1            # the phone's entry in the neighbour table
+# still unsure which address? scan the tiny USB subnet:
+nmap -sn 172.16.42.0/24                # (or: arp-scan -l)
+```
+
+```powershell
+# Windows host (PowerShell):
+Get-NetIPAddress -AddressFamily IPv4 | Where-Object IPAddress -like '172.16.42.*'
+arp -a | findstr 172.16.42
+ping 172.16.42.1
+```
+
+If you have a local keyboard/console on the phone itself, read it from the phone side:
+```sh
+ip -4 addr show usb0          # the gadget interface (usb0/rndis0/ncm0)
+ip -4 addr | grep 172.16.42
+```
+
 ### SSH — normal full system (use this 99% of the time)
 ```sh
 ssh fudio101@172.16.42.1          # password: 147147
