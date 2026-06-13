@@ -42,15 +42,15 @@ The Vsmart Active 1 is a rebrand of the **BQ Aquaris X2 Pro** and is very close 
 |---|---|
 | Flashing | Works |
 | Booting (fastboot boot / flashed boot) | Works |
-| Internal storage (eMMC HS400) | Works |
+| Internal storage (eMMC HS400, 50.5G root) | Works |
 | USB Networking | Works |
 | USB OTG | Untested |
 | Display (console via simple-framebuffer) | Works |
 | Display (DRM panel HX83112A) | WIP |
 | Touchscreen (Himax in-cell) | Broken / WIP |
 | Battery / charging (PM660) | Partial |
-| WiFi (WCN3990) | Untested |
-| Bluetooth (WCN3990) | Untested |
+| WiFi (WCN3990) | Works |
+| Bluetooth (WCN3990) | Works |
 | Modem (calls/SMS/data) | Untested |
 | GPU (Adreno 512) | Untested |
 

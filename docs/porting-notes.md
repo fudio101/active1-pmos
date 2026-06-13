@@ -35,3 +35,11 @@
 - WSL flashing: `FASTBOOT=/mnt/c/adb/fastboot.exe ./dev.sh flash`, or use usbipd-win, or move
   to a native Linux/macOS host.
 - Regenerate the kernel patch for upstreaming: `./dev.sh patch`.
+
+## UPDATE: iteration 1 complete + WiFi/BT working (2026-06-14)
+- pmOS boots; SSH up (fudio101@172.16.42.1 over USB, 192.168.1.2 over WiFi).
+- Storage: 50.5G root (auto-expanded) + 5.3G zram swap.
+- Bluetooth: hci0 (WCN3990) up.
+- WiFi: wlan0 works (scans 2.4+5GHz, connected to LAN with internet).
+- Fix: device package now depends on firmware-xiaomi-jasmine_sprout (WCN3990 board-2.bin).
+- Remaining: per-device WiFi MAC (currently random); avoid 'press power' on reboot (AVB).
