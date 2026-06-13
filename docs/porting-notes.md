@@ -76,3 +76,19 @@ Investigation (2026-06-14):
   different path on a warm boot. ramoops (ramoops@a0000000) is wiped by the forced cold boot,
   so it cannot capture the hang.
 Workaround for now: treat as a cold-boot-only device; avoid soft reboots.
+
+## KNOWN ISSUE: touchscreen (Himax HX83112A) - WIP, parked
+Hardware confirmed working at the bus level:
+- Touch IC is on blsp_i2c1 (i2c-0, c175000.i2c) at address **0x48** (irq gpio67, reset gpio66).
+- The IC responds and reports **product id 0x83112a** (the panel is a HX83112A TDDI).
+- Power/reset are fine (the in-cell touch is powered with the panel rail).
+Mainline driver himax_hx83112b only knows id 0x83112b. A DT node with
+compatible="himax,hx83112a" + a driver hx83112a chip variant was tried; the IC was read
+correctly (id 0x83112a) but probe still went through the hx83112b id-check path and failed
+with -EINVAL ("Unknown product id: 83112a"). The chip-variant selection needs another look
+(of_match vs i2c_get_match_data picking the wrong himax_chip). Reverted for now.
+To resume: add `static const struct himax_chip hx83112a_chip = { .id = 0x83112a,
+.check_id = himax_check_product_id, .read_events = himax_read_events };` + of_match
+"himax,hx83112a", enable CONFIG_TOUCHSCREEN_HIMAX_HX83112B, DT node touchscreen@48
+(reg 0x48, irq gpio67 LEVEL_LOW, reset gpio66, size 1080x2160). Verify the right chip
+variant is bound before debugging the protocol.

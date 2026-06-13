@@ -4,17 +4,20 @@ maintainer="Alexey Minnekhanov <alexeymin@minlexx.ru>"
 pkgname=device-vsmart-zangyapro
 pkgdesc="Vsmart Active 1"
 pkgver=3
-pkgrel=1
+pkgrel=2
 url="https://postmarketos.org"
 license="MIT"
 arch="aarch64"
 options="!check !archcheck"
 depends="
+	bluez
 	firmware-qcom-adreno-a530
 	firmware-vsmart-zangyapro
 	linux-postmarketos-qcom-sdm660
 	mkbootimg
 	msm-firmware-loader
+	networkmanager
+	openssh-server
 	postmarketos-base
 	soc-qcom-sdm660
 	soc-qcom-sdm660-rproc
@@ -32,6 +35,14 @@ build() {
 
 package() {
 	devicepkg_package $startdir $pkgname
+
+	# Auto-start Bluetooth at boot (for a BT keyboard on a headless box)
+	# and make sure WiFi (NetworkManager) and SSH come up too. The firmware
+	# (board-2.bin for WiFi, a512_zap.mbn for the GPU) ships in
+	# firmware-vsmart-zangyapro, which is a hard dependency above.
+	install -dm755 "$pkgdir"/etc/systemd/system/multi-user.target.wants
+	ln -sf /usr/lib/systemd/system/bluetooth.service \
+		"$pkgdir"/etc/systemd/system/multi-user.target.wants/bluetooth.service
 }
 
 sha512sums="
