@@ -1,0 +1,15 @@
+# Maintainer: fudio101 <thenguyen1024@gmail.com>
+pkgname=firmware-vsmart-zangyapro
+pkgver=1
+pkgrel=0
+pkgdesc="Vsmart Active 1 (zangyapro) WCN3990 WiFi board firmware"
+url="https://postmarketos.org"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck !spdx !tracedeps"
+source="board-2.bin firmware-5.bin"
+_fw="lib/firmware/ath10k/WCN3990/hw1.0"
+package() {
+	install -Dm644 "$srcdir"/board-2.bin "$pkgdir"/$_fw/board-2.bin
+	install -Dm644 "$srcdir"/firmware-5.bin "$pkgdir"/$_fw/firmware-5.bin
+}

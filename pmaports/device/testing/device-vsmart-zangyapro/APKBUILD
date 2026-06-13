@@ -1,3 +1,4 @@
+# Maintainer: fudio101 <thenguyen1024@gmail.com>
 # Reference: <https://postmarketos.org/devicepkg>
 maintainer="Alexey Minnekhanov <alexeymin@minlexx.ru>"
 pkgname=device-vsmart-zangyapro
@@ -10,7 +11,7 @@ arch="aarch64"
 options="!check !archcheck"
 depends="
 	firmware-qcom-adreno-a530
-	firmware-xiaomi-jasmine_sprout
+	firmware-vsmart-zangyapro
 	linux-postmarketos-qcom-sdm660
 	mkbootimg
 	msm-firmware-loader
