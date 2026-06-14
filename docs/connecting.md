@@ -65,25 +65,18 @@ On a normal boot you do not need telnet — go straight to SSH.
 
 ## 2. WiFi — scan & connect
 
-### NetworkManager (preferred)
+NetworkManager and the WiFi backend (wpa_supplicant) ship in the image and manage WiFi
+automatically — nothing to install or set up, just connect with `nmcli`:
+
 ```sh
-nmcli radio wifi on                              # make sure the radio is on
 nmcli dev wifi list                              # scan / list networks
 nmcli dev wifi connect "SSID" password "PASS"    # connect
-nmcli dev status                                 # see wlan0 state
 nmcli -g IP4.ADDRESS dev show wlan0              # the phone's WiFi IP
+nmcli con show                                   # saved connections
 nmcli con delete "SSID"                          # forget a network
 ```
-Connections are saved and auto-reconnect on the next boot.
-
-### Fallback — wpa_supplicant (if `nmcli` is not installed)
-```sh
-sudo rfkill unblock wifi
-wpa_passphrase "SSID" "PASS" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf
-sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
-sudo udhcpc -i wlan0            # get an IP (or: sudo dhcpcd wlan0)
-ip addr show wlan0
-```
+Connections are saved and **auto-reconnect on the next boot**, so each network only needs the
+password once.
 
 Once WiFi is up you can SSH over the network instead of the cable:
 ```sh
