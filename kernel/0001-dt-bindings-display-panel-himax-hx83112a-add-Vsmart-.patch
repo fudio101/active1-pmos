@@ -1,6 +1,6 @@
-From 4cd44de176ea8ac856fdce96341660fc74bf42ce Mon Sep 17 00:00:00 2001
-From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 14:43:19 +0000
+From 1fac7ddea454bced43e6f9feac3c2d330c9d4fdb Mon Sep 17 00:00:00 2001
+From: Adrian Nguyen <thenguyen1024@gmail.com>
+Date: Sun, 14 Jun 2026 15:02:47 +0000
 Subject: [PATCH 1/4] dt-bindings: display: panel: himax,hx83112a: add Vsmart
  Active 1 panel
 
@@ -8,7 +8,7 @@ Add a compatible for the DJN HX83112A 1080x2160 panel on the Vsmart
 Active 1 (PQ6001 / BQ Aquaris X2 Pro). Turn the single compatible into an
 enum so it holds both the existing Fairphone 3 panel and the new one.
 
-Signed-off-by: fudio101 <thenguyen1024@gmail.com>
+Signed-off-by: Adrian Nguyen <thenguyen1024@gmail.com>
 ---
  .../devicetree/bindings/display/panel/himax,hx83112a.yaml  | 7 +++++--
  1 file changed, 5 insertions(+), 2 deletions(-)

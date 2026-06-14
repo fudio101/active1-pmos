@@ -1,12 +1,12 @@
-From 8f3c0b39790b08e98920809cdaa362f729e71d8c Mon Sep 17 00:00:00 2001
-From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 14:43:20 +0000
+From be7edfeaf4ec965e104a47e96c516b8e6cc15fab Mon Sep 17 00:00:00 2001
+From: Adrian Nguyen <thenguyen1024@gmail.com>
+Date: Sun, 14 Jun 2026 15:02:47 +0000
 Subject: [PATCH 3/4] dt-bindings: arm: qcom: document Vsmart Active 1
 
 Add the vsmart,active1 board compatible (Qualcomm SDM660) used by the
 new device tree.
 
-Signed-off-by: fudio101 <thenguyen1024@gmail.com>
+Signed-off-by: Adrian Nguyen <thenguyen1024@gmail.com>
 ---
  Documentation/devicetree/bindings/arm/qcom.yaml | 1 +
  1 file changed, 1 insertion(+)

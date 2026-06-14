@@ -1,44 +1,45 @@
-From 9ccb78b870a5e7ce57fdebd77e8aebbe4492f97c Mon Sep 17 00:00:00 2001
-From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 14:43:20 +0000
+From 435f35594d51a426e6d34aa18a31857a5796f6cb Mon Sep 17 00:00:00 2001
+From: Adrian Nguyen <thenguyen1024@gmail.com>
+Date: Sun, 14 Jun 2026 15:02:48 +0000
 Subject: [PATCH 4/4] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
 
-The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro built
-on the Qualcomm SDM660. Add a device tree derived from the Xiaomi Mi A2
-(sdm660-xiaomi-jasmine) enabling eMMC, USB, UART, WCN3990 Bluetooth, the
-Adreno 512 GPU (zap shader), the PMIC (charger, fuel gauge, power and
-volume keys) and the DJN HX83112A 1080x2160 DSI panel.
+The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro
+(LineageOS codename zangyapro) built on the Qualcomm SDM660. Add a device
+tree derived from the Xiaomi Mi A2 (sdm660-xiaomi-jasmine) enabling eMMC
+(HS400), the microSD slot, USB, UART, WCN3990 Bluetooth, the Adreno 512
+GPU (zap shader), the PMIC (charger, fuel gauge, power and volume keys)
+and the DJN HX83112A 1080x2160 DSI panel.
 
 The in-cell touchscreen is not yet wired up.
 
-Signed-off-by: fudio101 <thenguyen1024@gmail.com>
+Signed-off-by: Adrian Nguyen <thenguyen1024@gmail.com>
 ---
  arch/arm64/boot/dts/qcom/Makefile             |   1 +
- .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 580 ++++++++++++++++++
- 2 files changed, 581 insertions(+)
+ .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 593 ++++++++++++++++++
+ 2 files changed, 594 insertions(+)
  create mode 100644 arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 
 diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
-index bada54a0e..1e8348906 100644
+index bada54a0e..1236050c7 100644
 --- a/arch/arm64/boot/dts/qcom/Makefile
 +++ b/arch/arm64/boot/dts/qcom/Makefile
-@@ -256,6 +256,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-bbry-athena-syna.dtb
+@@ -253,6 +253,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= sdm636-xiaomi-tulip.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sdm636-xiaomi-whyred.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-bbry-athena-boe.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-bbry-athena-syna.dtb
++dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-vsmart-zangyapro.dtb
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-clover.dtb
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-clover-plus.dtb
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-jasmine.dtb
-+dtb-$(CONFIG_ARCH_QCOM) += sdm660-vsmart-zangyapro.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-lavender-shenchao.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-lavender-tianma.dtb
- dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-lavender-boe.dtb
 diff --git a/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 new file mode 100644
-index 000000000..849f28df7
+index 000000000..0851128ac
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
-@@ -0,0 +1,580 @@
+@@ -0,0 +1,593 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
 +/*
-+ * Copyright (c) 2026, fudio101 <thenguyen1024@gmail.com>
++ * Copyright (c) 2026, Adrian Nguyen <thenguyen1024@gmail.com>
 + *
 + * Derived from sdm660-xiaomi-jasmine.dts
 + * Copyright (c) 2022, Joe Mason <buddyjojo06@outlook.com>
@@ -571,7 +572,20 @@ index 000000000..849f28df7
 +	status = "okay";
 +};
 +
++&sdhc_2 {
++	cd-gpios = <&tlmm 54 GPIO_ACTIVE_LOW>;
++
++	vmmc-supply = <&vreg_l5b_2p95>;
++	vqmmc-supply = <&vreg_l2b_2p95>;
++
++	no-sdio;
++	no-mmc;
++
++	status = "okay";
++};
++
 +&tlmm {
++	/* GPIOs 8-11 are reserved for the fingerprint sensor's SPI bus. */
 +	gpio-reserved-ranges = <8 4>;
 +
 +	panel_reset_n: panel-rst-n-state {

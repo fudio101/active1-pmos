@@ -1,5 +1,5 @@
 # Reference: <https://postmarketos.org/devicepkg>
-maintainer="fudio101 <thenguyen1024@gmail.com>"
+maintainer="Adrian Nguyen <thenguyen1024@gmail.com>"
 pkgname=device-vsmart-zangyapro
 pkgdesc="Vsmart Active 1"
 pkgver=3
