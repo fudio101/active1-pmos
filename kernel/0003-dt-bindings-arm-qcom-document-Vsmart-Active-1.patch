@@ -1,6 +1,6 @@
-From d3e3d61b729bed3b57c4e378ae6d7bbe7b07e44f Mon Sep 17 00:00:00 2001
+From 8f3c0b39790b08e98920809cdaa362f729e71d8c Mon Sep 17 00:00:00 2001
 From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 11:57:21 +0000
+Date: Sun, 14 Jun 2026 14:43:20 +0000
 Subject: [PATCH 3/4] dt-bindings: arm: qcom: document Vsmart Active 1
 
 Add the vsmart,active1 board compatible (Qualcomm SDM660) used by the

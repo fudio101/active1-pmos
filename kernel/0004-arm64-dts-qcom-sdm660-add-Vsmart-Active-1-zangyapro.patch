@@ -1,6 +1,6 @@
-From c8a21da47a071590ea7b03cbee7a626f2a268810 Mon Sep 17 00:00:00 2001
+From 9ccb78b870a5e7ce57fdebd77e8aebbe4492f97c Mon Sep 17 00:00:00 2001
 From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 11:57:21 +0000
+Date: Sun, 14 Jun 2026 14:43:20 +0000
 Subject: [PATCH 4/4] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
 
 The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro built

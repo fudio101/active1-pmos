@@ -1,6 +1,6 @@
-From ab694e87e7b6909d7b38fa668c4ed0d82cc866de Mon Sep 17 00:00:00 2001
+From 4cd44de176ea8ac856fdce96341660fc74bf42ce Mon Sep 17 00:00:00 2001
 From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 11:11:10 +0000
+Date: Sun, 14 Jun 2026 14:43:19 +0000
 Subject: [PATCH 1/4] dt-bindings: display: panel: himax,hx83112a: add Vsmart
  Active 1 panel
 
