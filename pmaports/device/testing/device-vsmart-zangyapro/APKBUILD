@@ -4,11 +4,18 @@ maintainer="Alexey Minnekhanov <alexeymin@minlexx.ru>"
 pkgname=device-vsmart-zangyapro
 pkgdesc="Vsmart Active 1"
 pkgver=3
-pkgrel=2
+pkgrel=3
 url="https://postmarketos.org"
 license="MIT"
 arch="aarch64"
 options="!check !archcheck"
+# NetworkManager (+WiFi backend), wpa_supplicant and openssh are pulled in by
+# the chosen UI (postmarketos-ui-console -> postmarketos-base-ui-networkmanager)
+# and postmarketos-base, so they are NOT listed here. Only device-specific bits
+# stay: the firmware (board-2.bin for WiFi + a512_zap.mbn for the GPU, both in
+# firmware-vsmart-zangyapro; a530 microcode in firmware-qcom-adreno-a530), the
+# kernel, the SoC glue, and bluez (base-ui only integrates BT *if* bluez is
+# present, so keep it to guarantee the auto-start symlink below works).
 depends="
 	bluez
 	firmware-qcom-adreno-a530
@@ -16,8 +23,6 @@ depends="
 	linux-postmarketos-qcom-sdm660
 	mkbootimg
 	msm-firmware-loader
-	networkmanager
-	openssh-server
 	postmarketos-base
 	soc-qcom-sdm660
 	soc-qcom-sdm660-rproc
