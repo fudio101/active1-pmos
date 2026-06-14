@@ -4,7 +4,7 @@ maintainer="Alexey Minnekhanov <alexeymin@minlexx.ru>"
 pkgname=device-vsmart-zangyapro
 pkgdesc="Vsmart Active 1"
 pkgver=3
-pkgrel=3
+pkgrel=4
 url="https://postmarketos.org"
 license="MIT"
 arch="aarch64"
@@ -24,6 +24,7 @@ depends="
 	mkbootimg
 	msm-firmware-loader
 	postmarketos-base
+	qbootctl
 	soc-qcom-sdm660
 	soc-qcom-sdm660-rproc
 

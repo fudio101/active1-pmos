@@ -92,3 +92,8 @@ To resume: add `static const struct himax_chip hx83112a_chip = { .id = 0x83112a,
 "himax,hx83112a", enable CONFIG_TOUCHSCREEN_HIMAX_HX83112B, DT node touchscreen@48
 (reg 0x48, irq gpio67 LEVEL_LOW, reset gpio66, size 1080x2160). Verify the right chip
 variant is bound before debugging the protocol.
+
+## FIX: A/B boot-slot retry -> dropped to fastboot (2026-06-14)
+Symptom: after running a few hours (battery drained to empty) the device came back stuck in
+fastboot and would not boot pmOS. Cause: this is an A/B device; pmOS did not mark the slot
+"successful", so the bootloader decremented slot_as
