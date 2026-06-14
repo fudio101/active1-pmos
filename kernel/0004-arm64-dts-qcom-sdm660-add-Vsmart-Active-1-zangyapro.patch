@@ -1,4 +1,4 @@
-From e1568b7bb7ad5e49b00a35cea739833a68e40163 Mon Sep 17 00:00:00 2001
+From 539c635fc2ee63ba74a93eee43f2c4416cdd1254 Mon Sep 17 00:00:00 2001
 From: Adrian Nguyen <thenguyen1024@gmail.com>
 Date: Sun, 14 Jun 2026 15:23:06 +0000
 Subject: [PATCH 4/4] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
@@ -33,7 +33,7 @@ index bada54a0e..1236050c7 100644
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-jasmine.dtb
 diff --git a/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 new file mode 100644
-index 000000000..0851128ac
+index 000000000..7a41b0785
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 @@ -0,0 +1,593 @@
@@ -157,10 +157,10 @@ index 000000000..0851128ac
 +
 +	bluetooth {
 +		compatible = "qcom,wcn3990-bt";
-+		vddxo-supply = <&vreg_l9a_1p8>; // downstream: vdd-core-supply
-+		vddrf-supply = <&vreg_l6a_1p3>; // vdd-pa-supply
-+		vddch0-supply = <&vreg_l19a_3p3>; // vdd-ldo-supply
-+		vddio-supply = <&vreg_l13a_1p8>; // chip-pwd-supply ? // TODO: check
++		vddxo-supply = <&vreg_l9a_1p8>;
++		vddrf-supply = <&vreg_l6a_1p3>;
++		vddch0-supply = <&vreg_l19a_3p3>;
++		vddio-supply = <&vreg_l13a_1p8>;
 +		max-speed = <3200000>;
 +	};
 +};
