@@ -70,25 +70,27 @@ the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 
 
 The port is two upstream contributions, in order:
 
-1. **Kernel** — submit the patch series in [`kernel/`](kernel) to the SDM660 kernel tree
-   ([sdm660-mainline/linux](https://github.com/sdm660-mainline/linux)) and/or mainline
-   (the panel driver + binding belong in drm-misc):
-   - `0001-dt-bindings-…-himax-hx83112a-add-Vsmart-Active-1-panel.patch`
-   - `0002-drm-panel-himax-hx83112a-add-Vsmart-Active-1-DJN-…patch`
-   - `0003-arm64-dts-qcom-sdm660-add-Vsmart-Active-1-zangyapro.patch`
+1. **Kernel** — the patch series in [`kernel/`](kernel) (binding → driver → dts) is **submitted**
+   as **[sdm660-mainline/linux#185](https://github.com/sdm660-mainline/linux/pull/185)**
+   (branch `fudio101/vsmart-active1` → base `qcom-sdm660-6.19.y`, the kernel actually tested on
+   the device). The panel driver + binding ideally also go to mainline `drm-misc`. The pmaports
+   kernel package builds from a release tarball, so the series must **merge and a new sdm660 tag
+   be cut** before the build stops needing `--src`; until then the build uses the local
+   `~/linux-sdm660` source. All three patches pass `checkpatch` (the one dts warning is the usual
+   MAINTAINERS false-positive).
+2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr) (three commits to apply once the
+   kernel tag lands). Blocked on (1): the device dtb and the panel driver only exist once the new
+   tag ships them. The three changes:
+   - `device/testing/linux-postmarketos-qcom-sdm660`: enable
+     `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` and bump `_pkgver`/`_tag` to the new sdm660 tag.
+   - `device/testing/device-vsmart-zangyapro/` — the device package
+     (mirrored at `pmaports/device/testing/device-vsmart-zangyapro/`).
+   - `device/testing/firmware-vsmart-zangyapro/` — device firmware blobs (WCN3990 `board-2.bin`,
+     Adreno 512 `a512_zap.mbn`).
 
-   The pmaports kernel package builds from a release tarball, so these must land in the kernel
-   tree (and a new tag be cut) before the build stops needing `--src`. Until then the build uses
-   the local `~/linux-sdm660` source. All patches carry a proper subject + `Signed-off-by` and
-   pass `checkpatch` (the one dts warning is the usual MAINTAINERS false-positive). The panel
-   also needs `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` in the `linux-postmarketos-qcom-sdm660` kernel
-   config — that is a **pmaports** change to the shared SoC kernel package, submitted with (2).
-2. **pmaports packages** — once a kernel tag ships the dtb, copy
-   `pmaports/device/testing/device-vsmart-zangyapro/` and
-   `pmaports/device/testing/firmware-vsmart-zangyapro/` into a
-   [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout and open a merge
-   request (follow `COMMITSTYLE.md` there). `firmware-vsmart-zangyapro` ships the device-specific
-   binary blobs (WCN3990 `board-2.bin`, Adreno 512 `a512_zap.mbn`).
+   Copy these into a [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout
+   and open a merge request following its `COMMITSTYLE.md` (GitLab — needs `glab`/GitLab auth,
+   not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for the exact steps.
 3. **Wiki** — publish `wiki/Vsmart_Active_1.md`.
 
 ## Environment notes

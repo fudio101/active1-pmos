@@ -1,0 +1,12 @@
+# Enable the Himax HX83112A DRM panel in the shared SDM660 kernel config.
+# Apply inside a pmaports checkout (path relative to the pmaports root).
+# Tag-independent: the one config line is all that changes; bump pkgver/_tag separately.
+--- a/device/testing/linux-postmarketos-qcom-sdm660/config-postmarketos-qcom-sdm660.aarch64
++++ b/device/testing/linux-postmarketos-qcom-sdm660/config-postmarketos-qcom-sdm660.aarch64
+@@
+ # CONFIG_DRM_PANEL_HIMAX_HX8279 is not set
+ # CONFIG_DRM_PANEL_HIMAX_HX83102 is not set
+-# CONFIG_DRM_PANEL_HIMAX_HX83112A is not set
++CONFIG_DRM_PANEL_HIMAX_HX83112A=m
+ # CONFIG_DRM_PANEL_HIMAX_HX83112B is not set
+ # CONFIG_DRM_PANEL_HIMAX_HX8394 is not set
