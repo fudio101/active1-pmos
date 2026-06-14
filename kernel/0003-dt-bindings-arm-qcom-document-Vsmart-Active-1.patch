@@ -1,0 +1,28 @@
+From d3e3d61b729bed3b57c4e378ae6d7bbe7b07e44f Mon Sep 17 00:00:00 2001
+From: fudio101 <thenguyen1024@gmail.com>
+Date: Sun, 14 Jun 2026 11:57:21 +0000
+Subject: [PATCH 3/4] dt-bindings: arm: qcom: document Vsmart Active 1
+
+Add the vsmart,active1 board compatible (Qualcomm SDM660) used by the
+new device tree.
+
+Signed-off-by: fudio101 <thenguyen1024@gmail.com>
+---
+ Documentation/devicetree/bindings/arm/qcom.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/qcom.yaml b/Documentation/devicetree/bindings/arm/qcom.yaml
+index b18135ea9..1f878f66c 100644
+--- a/Documentation/devicetree/bindings/arm/qcom.yaml
++++ b/Documentation/devicetree/bindings/arm/qcom.yaml
+@@ -841,6 +841,7 @@ properties:
+               - xiaomi,platina
+               - bbry,athena-boe
+               - bbry,athena-syna
++              - vsmart,active1
+           - const: qcom,sdm660
+ 
+       - items:
+-- 
+2.53.0
+

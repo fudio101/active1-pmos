@@ -70,14 +70,15 @@ the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 
 
 The port is two upstream contributions, in order:
 
-1. **Kernel** — the patch series in [`kernel/`](kernel) (binding → driver → dts) is **submitted**
-   as **[sdm660-mainline/linux#185](https://github.com/sdm660-mainline/linux/pull/185)**
+1. **Kernel** — the 4-patch series in [`kernel/`](kernel) (panel binding → driver → board binding
+   → dts) is **submitted** as
+   **[sdm660-mainline/linux#185](https://github.com/sdm660-mainline/linux/pull/185)**
    (branch `fudio101/vsmart-active1` → base `qcom-sdm660-6.19.y`, the kernel actually tested on
    the device). The panel driver + binding ideally also go to mainline `drm-misc`. The pmaports
    kernel package builds from a release tarball, so the series must **merge and a new sdm660 tag
    be cut** before the build stops needing `--src`; until then the build uses the local
-   `~/linux-sdm660` source. All three patches pass `checkpatch` (the one dts warning is the usual
-   MAINTAINERS false-positive).
+   `~/linux-sdm660` source. All patches pass `checkpatch`, `dt_binding_check` and `dtbs_check`
+   clean (the one dts `checkpatch` warning is the usual MAINTAINERS false-positive).
 2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr) (three commits to apply once the
    kernel tag lands). Blocked on (1): the device dtb and the panel driver only exist once the new
    tag ships them. The three changes:

@@ -1,7 +1,7 @@
 From 53edb96d014ea4d8143f482ddfbac8189f9ecf01 Mon Sep 17 00:00:00 2001
 From: fudio101 <thenguyen1024@gmail.com>
 Date: Sun, 14 Jun 2026 11:11:10 +0000
-Subject: [PATCH 2/3] drm/panel: himax-hx83112a: add Vsmart Active 1 DJN
+Subject: [PATCH 2/4] drm/panel: himax-hx83112a: add Vsmart Active 1 DJN
  1080x2160 variant
 
 The Vsmart Active 1 uses a DJN HX83112A panel in a 1080x2160 mode that
