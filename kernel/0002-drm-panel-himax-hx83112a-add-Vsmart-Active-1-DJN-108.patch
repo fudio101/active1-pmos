@@ -1,6 +1,6 @@
-From 3edb05427dce342e75cba92bc3ce8b184bb7d03f Mon Sep 17 00:00:00 2001
+From 9852b7465598d794a3b691214e2eb347aeb2fe32 Mon Sep 17 00:00:00 2001
 From: Adrian Nguyen <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 15:02:47 +0000
+Date: Sun, 14 Jun 2026 15:23:06 +0000
 Subject: [PATCH 2/4] drm/panel: himax-hx83112a: add Vsmart Active 1 DJN
  1080x2160 variant
 
@@ -19,6 +19,7 @@ only issues those two commands and leaves the reset line deasserted to
 preserve the bootloader init; pulsing reset would require the full
 sequence, which the vendor never exposes in DT.
 
+Assisted-by: Claude:claude-opus-4-8
 Signed-off-by: Adrian Nguyen <thenguyen1024@gmail.com>
 ---
  drivers/gpu/drm/panel/panel-himax-hx83112a.c | 134 ++++++++++++++++---

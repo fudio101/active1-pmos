@@ -1,17 +1,17 @@
-From 435f35594d51a426e6d34aa18a31857a5796f6cb Mon Sep 17 00:00:00 2001
+From e1568b7bb7ad5e49b00a35cea739833a68e40163 Mon Sep 17 00:00:00 2001
 From: Adrian Nguyen <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 15:02:48 +0000
+Date: Sun, 14 Jun 2026 15:23:06 +0000
 Subject: [PATCH 4/4] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
 
-The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro
-(LineageOS codename zangyapro) built on the Qualcomm SDM660. Add a device
-tree derived from the Xiaomi Mi A2 (sdm660-xiaomi-jasmine) enabling eMMC
-(HS400), the microSD slot, USB, UART, WCN3990 Bluetooth, the Adreno 512
-GPU (zap shader), the PMIC (charger, fuel gauge, power and volume keys)
-and the DJN HX83112A 1080x2160 DSI panel.
+The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro built
+on the Qualcomm SDM660. Add a device tree derived from the Xiaomi Mi A2
+(sdm660-xiaomi-jasmine) enabling eMMC, USB, UART, WCN3990 Bluetooth, the
+Adreno 512 GPU (zap shader), the PMIC (charger, fuel gauge, power and
+volume keys) and the DJN HX83112A 1080x2160 DSI panel.
 
 The in-cell touchscreen is not yet wired up.
 
+Assisted-by: Claude:claude-opus-4-8
 Signed-off-by: Adrian Nguyen <thenguyen1024@gmail.com>
 ---
  arch/arm64/boot/dts/qcom/Makefile             |   1 +
