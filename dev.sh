@@ -48,8 +48,11 @@ cmd_sync(){    # push dts + device package into the live build trees
   say "sync dts -> kernel source"
   cp -v "$DTS_SRC" "$KSRC/arch/arm64/boot/dts/qcom/$DTS"
   local MK="$KSRC/arch/arm64/boot/dts/qcom/Makefile"
+  # Insert the dtb entry tab-indented and in alphabetical order: before the
+  # first sdm660-xiaomi-* line, since "vsmart" sorts before "xiaomi".
+  local TAB; TAB=$(printf '\t')
   grep -q "${DTS%.dts}.dtb" "$MK" || \
-    sed -i "/sdm660-xiaomi-jasmine.dtb/a dtb-\$(CONFIG_ARCH_QCOM) += ${DTS%.dts}.dtb" "$MK"
+    sed -i "0,/sdm660-xiaomi-.*\.dtb/s/^.*sdm660-xiaomi-.*\.dtb.*\$/dtb-\$(CONFIG_ARCH_QCOM)${TAB}+= ${DTS%.dts}.dtb\n&/" "$MK"
   say "sync device package -> pmaports"
   local APORTS; APORTS="$(pmb config aports | tr -d '[:space:]')"
   local D="$APORTS/device/testing/device-$DEVICE"; mkdir -p "$D"

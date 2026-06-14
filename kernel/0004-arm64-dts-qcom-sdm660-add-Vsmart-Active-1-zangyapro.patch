@@ -1,4 +1,4 @@
-From 539c635fc2ee63ba74a93eee43f2c4416cdd1254 Mon Sep 17 00:00:00 2001
+From 224e48717abe345aa33b54c743b64315d9bc937c Mon Sep 17 00:00:00 2001
 From: Adrian Nguyen <thenguyen1024@gmail.com>
 Date: Sun, 14 Jun 2026 15:23:06 +0000
 Subject: [PATCH 4/4] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
@@ -15,8 +15,8 @@ Assisted-by: Claude:claude-opus-4-8
 Signed-off-by: Adrian Nguyen <thenguyen1024@gmail.com>
 ---
  arch/arm64/boot/dts/qcom/Makefile             |   1 +
- .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 593 ++++++++++++++++++
- 2 files changed, 594 insertions(+)
+ .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 586 ++++++++++++++++++
+ 2 files changed, 587 insertions(+)
  create mode 100644 arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 
 diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
@@ -33,10 +33,10 @@ index bada54a0e..1236050c7 100644
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-jasmine.dtb
 diff --git a/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 new file mode 100644
-index 000000000..7a41b0785
+index 000000000..b4047b7b0
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
-@@ -0,0 +1,593 @@
+@@ -0,0 +1,586 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
 +/*
 + * Copyright (c) 2026, Adrian Nguyen <thenguyen1024@gmail.com>
@@ -164,13 +164,6 @@ index 000000000..7a41b0785
 +		max-speed = <3200000>;
 +	};
 +};
-+
-+/*
-+ * Touchscreen is parked. The Active 1 has a Himax HX83112A (i2c-0 @ 0x48,
-+ * irq gpio67, reset gpio66) - NOT the Mi A2's Novatek. The inherited Novatek
-+ * node only spammed i2c errors, so the touch bus is left disabled for now.
-+ * To resume the Himax port see docs/porting-notes.md (IC product id 0x83112a).
-+ */
 +
 +&mdss {
 +	status = "okay";
@@ -541,20 +534,20 @@ index 000000000..7a41b0785
 +	};
 +};
 +
-+&sdc2_state_on {
-+	sd-cd-pins {
-+		pins = "gpio54";
-+		function = "gpio";
-+		bias-pull-up;
-+		drive-strength = <2>;
-+	};
-+};
-+
 +&sdc2_state_off {
 +	sd-cd-pins {
 +		pins = "gpio54";
 +		function = "gpio";
 +		bias-disable;
++		drive-strength = <2>;
++	};
++};
++
++&sdc2_state_on {
++	sd-cd-pins {
++		pins = "gpio54";
++		function = "gpio";
++		bias-pull-up;
 +		drive-strength = <2>;
 +	};
 +};

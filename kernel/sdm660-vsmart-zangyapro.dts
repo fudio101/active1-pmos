@@ -126,13 +126,6 @@
 	};
 };
 
-/*
- * Touchscreen is parked. The Active 1 has a Himax HX83112A (i2c-0 @ 0x48,
- * irq gpio67, reset gpio66) - NOT the Mi A2's Novatek. The inherited Novatek
- * node only spammed i2c errors, so the touch bus is left disabled for now.
- * To resume the Himax port see docs/porting-notes.md (IC product id 0x83112a).
- */
-
 &mdss {
 	status = "okay";
 };
@@ -502,20 +495,20 @@
 	};
 };
 
-&sdc2_state_on {
-	sd-cd-pins {
-		pins = "gpio54";
-		function = "gpio";
-		bias-pull-up;
-		drive-strength = <2>;
-	};
-};
-
 &sdc2_state_off {
 	sd-cd-pins {
 		pins = "gpio54";
 		function = "gpio";
 		bias-disable;
+		drive-strength = <2>;
+	};
+};
+
+&sdc2_state_on {
+	sd-cd-pins {
+		pins = "gpio54";
+		function = "gpio";
+		bias-pull-up;
 		drive-strength = <2>;
 	};
 };
