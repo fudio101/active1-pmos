@@ -9,11 +9,11 @@ for the open items.
 - Boots mainline Linux; the bootloader's android-verity / `skip_initramfs` cmdline is ignored by
   the mainline kernel, so no verity workaround / lk2nd is needed.
 - **Working:** eMMC (HS400, ~50 G auto-expanded root + zram swap), USB + WiFi networking,
-  Bluetooth (WCN3990), GPU (Adreno 512 / freedreno FD512), SSH, framebuffer console, charging
-  (with a ≥2 A charger), A/B-slot survival across reboots (`qbootctl`).
-- **Open:** touchscreen parked; the DRM panel node is not wired up (console uses the bootloader
-  simple-framebuffer); per-device WiFi MAC is random; modem untested. (Soft reboot, previously
-  thought broken, now works on a healthy battery — see the reboot note below.)
+  Bluetooth (WCN3990), GPU (Adreno 512 / freedreno FD512), **DSI display** (Himax HX83112A DJN
+  1080×2160, real DPU + DSI + panel console — not simple-framebuffer), SSH, charging (with a
+  ≥2 A charger), A/B-slot survival across reboots (`qbootctl`).
+- **Open:** touchscreen parked; per-device WiFi MAC is random; modem untested. (Soft reboot,
+  previously thought broken, now works on a healthy battery — see the reboot note below.)
 - **Firmware:** WiFi `board-2.bin` + GPU `a512_zap.mbn` ship in the local
   `firmware-vsmart-zangyapro` package (a hard dependency of `device-vsmart-zangyapro`); the
   Adreno a530 microcode comes from `firmware-qcom-adreno-a530`.
@@ -37,6 +37,31 @@ for the open items.
   panel. Headless: `EGL_PLATFORM=surfaceless` and `=device` both report freedreno/FD512, so the
   GPU is usable without a display (renderD128) for any future Wayland compositor.
 - Cosmetic: an `a530_pm4.fw` early-load warning at boot; the deferred fallback load succeeds.
+
+## Display panel (Himax HX83112A DJN 1080×2160) — works
+The panel is a **DJN HX83112A** in a 1080×2160 command/video mode (the stock cmdline calls it
+`qcom,mdss_dsi_hx83112a_djn_fhd_video`). The console runs through the real **DPU → DSI → panel**
+pipeline (`card0-DSI-1`), not the bootloader simple-framebuffer.
+
+Mainline already has `drivers/gpu/drm/panel/panel-himax-hx83112a.c` for the Fairphone 3's DJN
+panel (1080×2340). It was extended into a **multi-variant** driver (panel-descriptor pattern,
+like panel-himax-hx83102.c): the FP3 variant is kept byte-for-byte and a new
+`djn,a1-hx83112a` variant adds the 1080×2160 mode (H fp40/bp12/pw4, V fp32/bp2/pw2, 60 Hz,
+4-lane burst RGB888) plus a binding entry. Kernel changes are carried as patches in
+[`../kernel/`](../kernel) (binding, driver, dts) and need
+`CONFIG_DRM_PANEL_HIMAX_HX83112A=m` in the `linux-postmarketos-qcom-sdm660` config.
+
+**Init strategy (important):** the stock bootloader fully programs the panel IC and the supplies
+are always-on, so the `djn,a1-hx83112a` variant uses a **minimal init** (exit-sleep +
+display-on) and **does not pulse reset** (`soft_reset = false`) — pulsing reset would wipe the
+bootloader's register init and blank the panel. This lit the panel on the first try with no DCS
+errors. The DSI supplies are vddio = L11A (1.8 V) and the LAB/IBB rails emulated by the
+always-on `lcdb` fixed regulator (5.4 V); backlight is `pm660l_wled`; reset is gpio53.
+
+The panel module is added to the device package's `modules-initfs` so it loads in the initramfs
+alongside `msm`, bringing the display up early in boot. Verify on device:
+`cat /sys/class/drm/card0-DSI-1/status` (→ connected), `.../modes` (→ 1080x2160),
+`lsmod | grep hx83112a`, and the backlight under `/sys/class/backlight/*/brightness`.
 
 ## Soft reboot — most likely a low-power (brownout) issue, not a peripheral hang
 Earlier symptom: `reboot` (or any soft reboot) -> bootloader -> pmOS splash -> black screen ->
@@ -63,6 +88,10 @@ Historical investigation (PS_HOLD theory, now believed not the cause):
   PS_HOLD beats PSCI; `reboot` still hung, so reset type was not the cause. Both edits reverted.
 
 ## KNOWN ISSUE: touchscreen (Himax HX83112A) - WIP, parked
+Only the **touch** half of the HX83112A is parked; the **display** half is done (see the panel
+section above). The two are separate drivers: the panel is a DRM/DSI driver, the touch is a
+separate i2c input driver.
+
 Hardware confirmed working at the bus level:
 - Touch IC is on blsp_i2c1 (i2c-0, c175000.i2c) at address **0x48** (irq gpio67, reset gpio66).
 - The IC responds and reports **product id 0x83112a** (the panel is a HX83112A TDDI).

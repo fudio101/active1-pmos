@@ -47,8 +47,7 @@ small **headless home server**.
 | Internal storage (eMMC HS400) | Works |
 | USB Networking | Works |
 | USB OTG | Untested |
-| Display (console via simple-framebuffer) | Works |
-| Display (DRM panel HX83112A) | WIP |
+| Display (DRM DSI panel HX83112A DJN 1080×2160) | Works |
 | Touchscreen (Himax HX83112A) | WIP (see Known issues) |
 | WiFi (WCN3990) | Works |
 | Bluetooth (WCN3990) | Works |
@@ -148,7 +147,9 @@ not needed for headless use.
 
 ## Notes
 
-- The display works via the bootloader-provided simple-framebuffer; the mainline DSI panel
-  driver for the HX83112A 2160-line variant is not wired up yet.
+- The display works through the real DPU + DSI + panel pipeline using a mainline DRM panel
+  driver. The mainline `panel-himax-hx83112a` (Fairphone 3, 1080×2340) was extended with a
+  `djn,a1-hx83112a` 1080×2160 variant for this device; the bootloader inits the IC so the
+  variant only does exit-sleep + display-on and skips reset. Only the in-cell touch is parked.
 - WiFi/BT use the same WCN3990 as the Mi A2. The firmware (`board-2.bin`) lives in the rootfs
   (`firmware-vsmart-zangyapro`), so it is absent during `fastboot boot` probes.

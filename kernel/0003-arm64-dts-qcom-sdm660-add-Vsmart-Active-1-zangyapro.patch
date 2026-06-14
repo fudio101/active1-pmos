@@ -1,23 +1,21 @@
-From e08419db4a651a1ee4bd2cb4ab6c78f17bb65052 Mon Sep 17 00:00:00 2001
+From b041aaaf26b70930db27cadca7c911752e21e8d8 Mon Sep 17 00:00:00 2001
 From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 09:08:12 +0000
-Subject: [PATCH] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
+Date: Sun, 14 Jun 2026 11:11:10 +0000
+Subject: [PATCH 3/3] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
 
 The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro built
 on the Qualcomm SDM660. Add a device tree derived from the Xiaomi Mi A2
 (sdm660-xiaomi-jasmine) enabling eMMC, USB, UART, WCN3990 Bluetooth, the
 Adreno 512 GPU (zap shader), the PMIC (charger, fuel gauge, power and
-volume keys) and the bootloader-provided simple-framebuffer.
+volume keys) and the DJN HX83112A 1080x2160 DSI panel.
 
-The Himax HX83112A DSI panel and its in-cell touch are not yet wired up
-(no mainline driver for this variant), so the console uses the simple
-framebuffer for now.
+The in-cell touchscreen is not yet wired up.
 
 Signed-off-by: fudio101 <thenguyen1024@gmail.com>
 ---
  arch/arm64/boot/dts/qcom/Makefile             |   1 +
- .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 534 ++++++++++++++++++
- 2 files changed, 535 insertions(+)
+ .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 580 ++++++++++++++++++
+ 2 files changed, 581 insertions(+)
  create mode 100644 arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 
 diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
@@ -34,10 +32,10 @@ index bada54a0e..1e8348906 100644
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-lavender-boe.dtb
 diff --git a/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 new file mode 100644
-index 000000000..d5f712d1d
+index 000000000..849f28df7
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
-@@ -0,0 +1,534 @@
+@@ -0,0 +1,580 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
 +/*
 + * Copyright (c) 2026, fudio101 <thenguyen1024@gmail.com>
@@ -66,20 +64,7 @@ index 000000000..d5f712d1d
 +	};
 +
 +	chosen {
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+		ranges;
-+
 +		stdout-path = "serial0:115200n8";
-+
-+		framebuffer0: framebuffer@9d400000 {
-+			compatible = "simple-framebuffer";
-+			reg = <0 0x9d400000 0 (1080 * 2160 * 4)>;
-+			width = <1080>;
-+			height = <2160>;
-+			stride = <(1080 * 4)>;
-+			format = "a8r8g8b8";
-+		};
 +	};
 +
 +	battery: battery {
@@ -95,6 +80,21 @@ index 000000000..d5f712d1d
 +		regulator-name = "vph_pwr";
 +		regulator-min-microvolt = <3700000>;
 +		regulator-max-microvolt = <3700000>;
++
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	/*
++	 * This is here until we have a driver for the QPNP LCDB regulator.
++	 * It emulates both the positive (LAB) and negative (IBB) panel supplies.
++	 * The stock bootloader sets the LCDB to 5.4 V.
++	 */
++	lcdb_fixed: lcdb-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "lcdb";
++		regulator-min-microvolt = <5400000>;
++		regulator-max-microvolt = <5400000>;
 +
 +		regulator-always-on;
 +		regulator-boot-on;
@@ -126,11 +126,6 @@ index 000000000..d5f712d1d
 +			record-size = <0x20000>;
 +			ftrace-size = <0x0>;
 +			pmsg-size = <0x20000>;
-+		};
-+
-+		framebuffer_mem: memory@9d400000 {
-+			reg = <0x0 0x9d400000 0x0 0x23ff000>;
-+			no-map;
 +		};
 +	};
 +
@@ -180,13 +175,48 @@ index 000000000..d5f712d1d
 +	status = "okay";
 +};
 +
-+/*
-+ * The DSI panel is a Himax HX83112A (1080x2160, DJN) which has no mainline
-+ * driver yet, so the DSI output is left disabled and the console uses the
-+ * bootloader-provided simple-framebuffer. The Adreno 512 GPU still works
-+ * headless via its render node. Add the panel + &mdss_dsi0 nodes here once a
-+ * HX83112A panel driver lands.
-+ */
++&mdss_dsi0 {
++	status = "okay";
++
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	vdd-supply = <&vreg_l1b_0p925>;
++	vdda-supply = <&vreg_l1a_1p225>;
++
++	panel@0 {
++		compatible = "djn,a1-hx83112a";
++		reg = <0>;
++
++		reset-gpios = <&tlmm 53 GPIO_ACTIVE_LOW>;
++
++		vdd1-supply = <&vreg_l11a_1p8>;
++		vsp-supply = <&lcdb_fixed>;
++		vsn-supply = <&lcdb_fixed>;
++
++		backlight = <&pm660l_wled>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&panel_reset_n &mdp_vsync_n>;
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&mdss_dsi0_out>;
++			};
++		};
++	};
++};
++
++&mdss_dsi0_out {
++	data-lanes = <0 1 2 3>;
++	remote-endpoint = <&panel_in>;
++};
++
++&mdss_dsi0_phy {
++	vcca-supply = <&vreg_l1b_0p925>;
++
++	status = "okay";
++};
 +
 +&mmss_smmu {
 +	status = "okay";
@@ -543,6 +573,20 @@ index 000000000..d5f712d1d
 +
 +&tlmm {
 +	gpio-reserved-ranges = <8 4>;
++
++	panel_reset_n: panel-rst-n-state {
++		pins = "gpio53";
++		function = "gpio";
++		drive-strength = <8>;
++		bias-disable;
++	};
++
++	mdp_vsync_n: mdp-vsync-n-state {
++		pins = "gpio59";
++		function = "mdp_vsync";
++		drive-strength = <2>;
++		bias-pull-down;
++	};
 +};
 +
 +&usb3 {

@@ -10,7 +10,7 @@ Nearly identical to the **Xiaomi Mi A2 (jasmine)** — `sdm660-xiaomi-jasmine.dt
 | RAM | OK | 3.67 GB usable (4 GB part) |
 | eMMC | OK | HS400, 58.2 GiB, `mmcblk1`, controller `c0c4000.mmc` |
 | USB | OK | NCM gadget; host 172.16.42.2, phone 172.16.42.1 |
-| Framebuffer console | OK | `simple-framebuffer` @ 0x9d400000, 1080x2160 a8r8g8b8 |
+| Display console | OK | DRM DPU+DSI+panel (`card0-DSI-1`), HX83112A DJN 1080x2160 |
 | Charger / battery | OK | `pm660-charger` + `qcom-battery` (PMI8998 FG); needs a >=2 A charger |
 
 ## Peripherals (status + reference values)
@@ -20,7 +20,7 @@ bring-up details and the open items.
 |---|---|---|
 | WiFi/BT | `qca,wcn3990` + `qcom,icnss`; firmware `board-2.bin` (ath10k WCN3990) | **Works** (firmware ships in `firmware-vsmart-zangyapro`; absent during `fastboot boot`). MAC is random. |
 | GPU | Adreno 512; zap shader `a512_zap.mbn` (from stock `vendor_a/firmware/a512_zap.elf`) | **Works** (freedreno FD512); firmware in `firmware-vsmart-zangyapro`. |
-| Panel | "DJN hx83112a 1080p video mode" | Console via simplefb works; **DRM DSI panel node not wired up** (the mainline HX83112A driver targets a 2340-line variant). |
+| Panel | "DJN hx83112a 1080p video mode" (`qcom,mdss_dsi_hx83112a_djn_fhd_video`) | **Works** — DRM DSI panel via `djn,a1-hx83112a` variant added to mainline `panel-himax-hx83112a` (vddio=L11A, LAB/IBB=`lcdb` 5.4V, reset gpio53, backlight pm660l_wled). Minimal init (no reset) leaning on bootloader IC init. |
 | Touch | Himax **HX83112A** TDDI, i2c-0 @ **0x48**, irq gpio67, rst gpio66, product id **0x83112a** | **WIP / parked** — mainline `himax_hx83112b` only knows id 0x83112b; needs an hx83112a variant. |
 | Fingerprint | `goodix,fingerprint` | Not needed |
 

@@ -26,20 +26,7 @@
 	};
 
 	chosen {
-		#address-cells = <2>;
-		#size-cells = <2>;
-		ranges;
-
 		stdout-path = "serial0:115200n8";
-
-		framebuffer0: framebuffer@9d400000 {
-			compatible = "simple-framebuffer";
-			reg = <0 0x9d400000 0 (1080 * 2160 * 4)>;
-			width = <1080>;
-			height = <2160>;
-			stride = <(1080 * 4)>;
-			format = "a8r8g8b8";
-		};
 	};
 
 	battery: battery {
@@ -55,6 +42,21 @@
 		regulator-name = "vph_pwr";
 		regulator-min-microvolt = <3700000>;
 		regulator-max-microvolt = <3700000>;
+
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	/*
+	 * This is here until we have a driver for the QPNP LCDB regulator.
+	 * It emulates both the positive (LAB) and negative (IBB) panel supplies.
+	 * The stock bootloader sets the LCDB to 5.4 V.
+	 */
+	lcdb_fixed: lcdb-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "lcdb";
+		regulator-min-microvolt = <5400000>;
+		regulator-max-microvolt = <5400000>;
 
 		regulator-always-on;
 		regulator-boot-on;
@@ -86,11 +88,6 @@
 			record-size = <0x20000>;
 			ftrace-size = <0x0>;
 			pmsg-size = <0x20000>;
-		};
-
-		framebuffer_mem: memory@9d400000 {
-			reg = <0x0 0x9d400000 0x0 0x23ff000>;
-			no-map;
 		};
 	};
 
@@ -140,13 +137,48 @@
 	status = "okay";
 };
 
-/*
- * The DSI panel is a Himax HX83112A (1080x2160, DJN) which has no mainline
- * driver yet, so the DSI output is left disabled and the console uses the
- * bootloader-provided simple-framebuffer. The Adreno 512 GPU still works
- * headless via its render node. Add the panel + &mdss_dsi0 nodes here once a
- * HX83112A panel driver lands.
- */
+&mdss_dsi0 {
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	vdd-supply = <&vreg_l1b_0p925>;
+	vdda-supply = <&vreg_l1a_1p225>;
+
+	panel@0 {
+		compatible = "djn,a1-hx83112a";
+		reg = <0>;
+
+		reset-gpios = <&tlmm 53 GPIO_ACTIVE_LOW>;
+
+		vdd1-supply = <&vreg_l11a_1p8>;
+		vsp-supply = <&lcdb_fixed>;
+		vsn-supply = <&lcdb_fixed>;
+
+		backlight = <&pm660l_wled>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&panel_reset_n &mdp_vsync_n>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&mdss_dsi0_out>;
+			};
+		};
+	};
+};
+
+&mdss_dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&mdss_dsi0_phy {
+	vcca-supply = <&vreg_l1b_0p925>;
+
+	status = "okay";
+};
 
 &mmss_smmu {
 	status = "okay";
@@ -503,6 +535,20 @@
 
 &tlmm {
 	gpio-reserved-ranges = <8 4>;
+
+	panel_reset_n: panel-rst-n-state {
+		pins = "gpio53";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+	};
+
+	mdp_vsync_n: mdp-vsync-n-state {
+		pins = "gpio59";
+		function = "mdp_vsync";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
 };
 
 &usb3 {

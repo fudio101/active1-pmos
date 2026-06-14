@@ -14,10 +14,10 @@ the pmOS rootfs without ever touching android-verity. No lk2nd needed.
 ## Status
 
 Running as a **headless home server**. Working: boot (eMMC HS400), USB + WiFi networking,
-Bluetooth, **GPU** (Adreno 512 / freedreno), SSH, framebuffer console, charging (with a ≥2 A
-charger), and A/B-slot survival across reboots (`qbootctl`). Soft reboot — once thought broken
-— works on a healthy battery (the earlier hangs were a low-power brownout). Known issue: the
-touchscreen is parked. See
+Bluetooth, **GPU** (Adreno 512 / freedreno), **DSI display** (Himax HX83112A DJN 1080×2160, real
+DPU+DSI panel console), SSH, charging (with a ≥2 A charger), and A/B-slot survival across
+reboots (`qbootctl`). Soft reboot — once thought broken — works on a healthy battery (the
+earlier hangs were a low-power brownout). Known issue: the touchscreen is parked. See
 [`docs/porting-notes.md`](docs/porting-notes.md), [`docs/hardware.md`](docs/hardware.md),
 [`docs/connecting.md`](docs/connecting.md) and [`docs/cheatsheet.md`](docs/cheatsheet.md).
 
@@ -70,10 +70,19 @@ the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 
 
 The port is two upstream contributions, in order:
 
-1. **Kernel device tree** — submit `kernel/0001-arm64-dts-qcom-sdm660-add-vsmart-active1.patch`
-   to the SDM660 kernel tree ([sdm660-mainline/linux](https://github.com/sdm660-mainline/linux))
-   and/or mainline. The pmaports kernel package builds from a release tarball, so the `.dts`
-   must land there first. The patch already carries a proper subject + `Signed-off-by`.
+1. **Kernel** — submit the patch series in [`kernel/`](kernel) to the SDM660 kernel tree
+   ([sdm660-mainline/linux](https://github.com/sdm660-mainline/linux)) and/or mainline
+   (the panel driver + binding belong in drm-misc):
+   - `0001-dt-bindings-…-himax-hx83112a-add-Vsmart-Active-1-panel.patch`
+   - `0002-drm-panel-himax-hx83112a-add-Vsmart-Active-1-DJN-…patch`
+   - `0003-arm64-dts-qcom-sdm660-add-Vsmart-Active-1-zangyapro.patch`
+
+   The pmaports kernel package builds from a release tarball, so these must land in the kernel
+   tree (and a new tag be cut) before the build stops needing `--src`. Until then the build uses
+   the local `~/linux-sdm660` source. All patches carry a proper subject + `Signed-off-by` and
+   pass `checkpatch` (the one dts warning is the usual MAINTAINERS false-positive). The panel
+   also needs `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` in the `linux-postmarketos-qcom-sdm660` kernel
+   config — that is a **pmaports** change to the shared SoC kernel package, submitted with (2).
 2. **pmaports packages** — once a kernel tag ships the dtb, copy
    `pmaports/device/testing/device-vsmart-zangyapro/` and
    `pmaports/device/testing/firmware-vsmart-zangyapro/` into a
