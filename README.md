@@ -52,8 +52,18 @@ Run `./dev.sh` with no arguments for the full command list. Dev loop:
 
 ## Configuration
 
-Defaults (editable at the top of `dev.sh`): device `vsmart-zangyapro`, user `fudio101`,
-password `147147`, hostname `vsmart-zangyapro`, console UI, SSH enabled, kernel 6.19.x.
+`fudio101` / `147147` throughout this repo are just the original porter's example credentials.
+The **device login user and password are chosen when you run `pmbootstrap init`** — pick your
+own there.
+
+To point the `./dev.sh` helpers at your own values without editing the tracked script, copy
+[`dev.config.example`](dev.config.example) to `dev.config` (gitignored) and set `SSH_USER`,
+`PASS`, `PHONE_IP`, `FASTBOOT`, etc. (or just export them as env vars). Other defaults live at
+the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 6.19.x.
+
+> The `maintainer=` field in the APKBUILDs is package metadata (who maintains the package
+> upstream) and stays `fudio101` — you do not change it just by building, only if you take over
+> maintenance.
 
 ## Upstreaming / publishing
 

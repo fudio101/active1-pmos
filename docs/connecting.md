@@ -2,6 +2,9 @@
 
 User: `fudio101`  ·  password: `147147`  (for sudo: `echo 147147 | sudo -S <cmd>`)
 
+> `fudio101` / `147147` are the example credentials from this install — substitute the user and
+> password you chose at `pmbootstrap init`.
+
 ---
 
 ## 1. Over the USB cable (no WiFi needed)

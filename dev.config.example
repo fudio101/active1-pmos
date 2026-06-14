@@ -1,0 +1,17 @@
+# dev.config — local overrides for dev.sh (copy to "dev.config", which is gitignored).
+# Only set what differs from the defaults; everything is optional.
+#
+#   cp dev.config.example dev.config
+#   # edit the values below, then use ./dev.sh as usual
+#
+# The device login user/password are NOT set here — you choose them when you run
+# `pmbootstrap init` (or `pmbootstrap config user <name>`). SSH_USER below only tells the
+# ./dev.sh ssh/dmesg helpers which user to connect as, so set it to match your install.
+
+# SSH_USER="myuser"                       # device user (default: fudio101)
+# PASS="mypassword"                       # device password (default: 147147)
+# PHONE_IP="172.16.42.1"                  # USB gadget IP (or your WiFi IP)
+# FASTBOOT="fastboot"                     # WSL: FASTBOOT=/mnt/c/adb/fastboot.exe
+# PMB="$HOME/pmbootstrap"                 # pmbootstrap checkout
+# KSRC="$HOME/linux-sdm660"               # kernel source tree
+# EXPORT_DIR="/tmp/pmos-export"           # where ./dev.sh export drops the images

@@ -11,7 +11,13 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ---- Configuration (override via env or edit here) ----
+# Optional local overrides (gitignored). Copy dev.config.example -> dev.config and put your
+# own SSH_USER / PASS / PHONE_IP / FASTBOOT there, instead of editing this tracked file or
+# exporting env vars every time. The device login user/password come from `pmbootstrap init`.
+if [ -f "$HERE/dev.config" ]; then . "$HERE/dev.config"; fi
+
+# ---- Configuration (override via dev.config, env, or edit here) ----
+# Defaults below are the original porter's values (user fudio101); change for your own setup.
 PMB="${PMB:-$HOME/pmbootstrap}"                  # pmbootstrap checkout
 KSRC="${KSRC:-$HOME/linux-sdm660}"               # kernel source (sdm660-mainline/linux)
 KTAG="${KTAG:-v6.19.10-sdm660}"
