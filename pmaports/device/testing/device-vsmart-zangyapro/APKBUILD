@@ -1,6 +1,5 @@
-# Maintainer: fudio101 <thenguyen1024@gmail.com>
 # Reference: <https://postmarketos.org/devicepkg>
-maintainer="Alexey Minnekhanov <alexeymin@minlexx.ru>"
+maintainer="fudio101 <thenguyen1024@gmail.com>"
 pkgname=device-vsmart-zangyapro
 pkgdesc="Vsmart Active 1"
 pkgver=3
@@ -52,6 +51,6 @@ package() {
 }
 
 sha512sums="
-c272829de15699f5f821540a2c6850633c39706a5d7161eb8675a12c1a14cad4645b71b6c1da8089a03d7e997d3cb7ca6d1635fc983e5d0abbda10305d437d3d  deviceinfo
-063a4f0ecfba79d1d47bc7aaf621c3a6314be97b1565ec9e6a0ad19afad6c2ef262da024c7df25292fb18a9d576bec5a060b8c4210125ad292bcc1bf61f7dc82  modules-initfs
+0740454a150a9c4ca6192108f1b2865faf6c70a4b90fce763e3741b3fca697df7874e98c6977fdf62f1af090f590dc05a4c85643fe9c1a653658f5692f114c2a  deviceinfo
+6dac4060da38e5bc2c8cec502b8c8638a0afd1f19f13527780bbc76b07f69ed6cb5e310a7d2e3568f6987991348afde0ed70771786e4a129c0ae0df86fe8d2bd  modules-initfs
 "

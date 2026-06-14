@@ -106,3 +106,25 @@ wall charger -> DCP, input 1.5A. At 450mA the running load (CPU+WiFi+BT, ~0.5A) 
 the battery NET-DISCHARGES even while "Charging" (this is why it died plugged into a weak port).
 On a 2A+ DCP charger: current_max=1.5A, battery current_now ~+1.15A = charges fine while running.
 Takeaway for the headless server: power it from a 2A+ wall charger, never a laptop/weak USB port.
+
+## Device measurements (2026-06-14, idle: WiFi+BT+console)
+- Power draw ~2.4 W, measured as charger input power minus battery charge power
+  (e.g. 1.41 A x 4.71 V in, 1.08 A x 3.98 V into battery -> 6.65 - 4.30 = 2.35 W). Heavy CPU
+  load pushes it to ~4-5 W.
+- Battery runtime on battery alone (built-in UPS): ~4.5 h from 100 %, ~3.5 h from 80 %
+  (3000 mAh, ~2.4 W idle).
+- Charging: a weak/laptop SDP port is capped ~450 mA -> net discharge while running; a 2 A DCP
+  wall charger gives ICL 1.5 A and ~1.1 A into the battery while running (charge ~40-55 %/h in
+  the low-SoC region).
+- Temps under charge + load: CPU 53-58 C, GPU ~57 C, SoC (pm660) ~55 C, battery ~44 C - all safe.
+- Charger driver qcom_smbx DOES read constant-charge-current/voltage and voltage-max-design from
+  the battery DT, but the defaults (ICL/FCC 1.5 A, CV 4.4 V from voltage-max-design) are already
+  sensible, so no extra charge-limit DT fields were added (would be redundant).
+
+## Protecting the local packages from apk
+device/firmware/kernel are local builds, absent from any public repo, so
+`apk upgrade -a|--available|--prune` will downgrade/remove them (it tried to downgrade the kernel
+to the repo version that lacks this DTS). Mitigations applied on the device:
+- All three pinned in /etc/apk/world (immune to --prune orphan removal).
+- Operating rule: only ever run plain `apk upgrade` (never -a / --available / --prune).
+- Full immunity would need a signed local repo on the device, or upstreaming to pmaports.

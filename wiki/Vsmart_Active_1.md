@@ -16,6 +16,7 @@
 | Display | 1080 x 2160, Himax HX83112A (DJN) |
 | RAM | 4 GB |
 | Storage | 64 GB eMMC |
+| Battery | 3000 mAh |
 | Architecture | aarch64 |
 | Original software | Android 9 |
 
@@ -29,7 +30,8 @@
 | Kernel | 6.19.x |
 
 The Vsmart Active 1 is a rebrand of the **BQ Aquaris X2 Pro** and is very close to the
-**Xiaomi Mi A2 (jasmine)**; the port is derived from the latter.
+**Xiaomi Mi A2 (jasmine)**; the port is derived from the latter. It is used here as a
+small **headless home server**.
 
 > **Note on verified boot:** the Vsmart bootloader enforces dm-android-verity and injects
 > `skip_initramfs` / `dm=...android-verity...` into the kernel command line, which blocks
@@ -42,18 +44,20 @@ The Vsmart Active 1 is a rebrand of the **BQ Aquaris X2 Pro** and is very close 
 |---|---|
 | Flashing | Works |
 | Booting (fastboot boot / flashed boot) | Works |
-| Internal storage (eMMC HS400, 50.5G root) | Works |
+| Internal storage (eMMC HS400) | Works |
 | USB Networking | Works |
 | USB OTG | Untested |
 | Display (console via simple-framebuffer) | Works |
 | Display (DRM panel HX83112A) | WIP |
-| Touchscreen (Himax in-cell) | Broken / WIP |
-| Battery / charging (PM660) | Partial |
+| Touchscreen (Himax HX83112A) | WIP (see Known issues) |
 | WiFi (WCN3990) | Works |
 | Bluetooth (WCN3990) | Works |
-| Modem (calls/SMS/data) | Untested |
-| GPU (Adreno 512, freedreno FD512) | Works (glmark2 score 512, 3D renders on panel) |
+| GPU (Adreno 512, freedreno FD512) | Works (glmark2 score 512, renders 3D on the panel) |
+| Charging (PM660) | Works (needs a ≥2 A charger; reporting WIP) |
+| Battery percentage (PMI8998 FG) | Partial (recalibrates over a charge cycle) |
+| A/B slot survival across reboots | Works (via `qbootctl`) |
 | Soft / unattended reboot | Broken (cold-boot only, see Known issues) |
+| Modem (calls/SMS/data) | Untested |
 
 ## Unlocking the bootloader
 
@@ -84,38 +88,66 @@ fastboot reboot
 
 To test without flashing: `pmbootstrap flasher boot` (or `fastboot boot boot.img`).
 
-## Mainline status
+**Flashing the rootfs over a 32-bit `fastboot.exe` (Windows):** large `fastboot flash userdata`
+transfers fail on this stack ("Invalid sparse file format" / "Write to device failed"). Split
+the raw image into ~20 MB sparse chunks (`img2simg` + `simg2simg ... 20000000`) and flash them
+sequentially; a USB-2.0 hub improves stability.
 
-**Working:** CPU/SMP, eMMC (HS400), USB (gadget networking), framebuffer console, fastboot
-boot, WiFi + Bluetooth (WCN3990), GPU (Adreno 512 via freedreno — glmark2 score 512, renders
-3D on the panel and works headless via the render node).
+## Running as a headless server
 
-**Partial:** charging (enabled by PMIC by default; battery reporting WIP).
-
-**Not working / WIP:** DRM panel node (HX83112A not yet added — console uses the bootloader
-framebuffer), touchscreen (Himax in-cell; no good mainline driver), modem, soft reboot.
+- **Power draw** (idle: WiFi + Bluetooth + console) is about **2.4 W**, measured from the
+  charger input minus the battery charge power. Under heavy CPU load it rises to ~4-5 W.
+- The 3000 mAh battery is effectively a **built-in UPS**: at idle it lasts roughly **~4.5 h
+  from 100 %** (~3.5 h from 80 %) on battery alone during a power cut.
+- **Charging needs a real ≥2 A wall charger.** BC1.2 detection works: a weak/laptop (SDP) port
+  is capped at ~450 mA, which is *less* than the running load, so the battery slowly drains
+  even while "Charging". A 2 A DCP charger pulls ~1.5 A and charges at ~1.1 A while running.
+- **`qbootctl`** is a hard dependency of the device package; its service marks the active A/B
+  slot "successful" at every boot. Without it, the bootloader counts down the slot retry
+  counter on each power-cycle and eventually drops to fastboot (see Known issues).
+- Connect over USB (`ssh user@172.16.42.1`) or WiFi/Tailscale. Bluetooth auto-starts at boot
+  (BT keyboard at the console). See `docs/connecting.md`.
 
 ## Known issues
 
 ### Soft / unattended reboot hangs (cold-boot only)
 
 `reboot` (or any software-initiated reboot) restarts into the bootloader and the pmOS splash,
-then the screen goes black and the boot hangs before SSH comes up. The only recovery is to
-hold **Power** to force the device off and then power it on again (a cold boot), which always
-works. This makes the device effectively **cold-boot-only** and blocks fully-headless reboots.
+then the screen goes black and the boot hangs before SSH comes up. Recovery: hold **Power** to
+force the device off, then power it on again (a cold boot always works). A soft reboot does a
+*warm* reset (CPUs restart but peripherals keep their state); a full power cycle clears it.
+Forcing the PMIC PS_HOLD reset type to HARD_RESET (and outranking the PSCI restart handler) was
+tried and did **not** fix it, so the reset *type* is not the (only) cause. `ramoops` is wiped
+by the forced cold boot, so the hang is not captured. Next step: a verbose boot image (drop
+`quiet splash`, add `ignore_loglevel`) and read the panel at the hang. See
+`docs/porting-notes.md`.
 
-Diagnosis so far: a soft reboot performs a *warm* reset (CPUs restart but peripherals — eMMC,
-remoteprocs, SMMU — keep their previous state), and the second boot hangs on that dirty
-hardware; a real power cycle clears it. Forcing the PMIC (pm660) PON `PS_HOLD` reset type from
-WARM_RESET to HARD_RESET (and making PS_HOLD outrank the PSCI restart handler) was tried and
-**did not** fix it, so the reset *type* is not the (only) cause. `ramoops` is wiped by the
-forced cold boot, so the hang is not captured. Next step: boot a verbose image (drop
-`quiet splash`, add `ignore_loglevel`) and read the panel at the hang to localise the stuck
-driver. See `docs/porting-notes.md` for the full write-up.
+### Dropped to fastboot after running flat
+
+A/B device: if the active slot is not marked "successful", the bootloader decrements its retry
+counter every power-cycle and eventually declares it unbootable, landing in fastboot (typically
+after the battery drains flat). Recovery: `fastboot set_active a && fastboot reboot`. This is
+fixed permanently by the `qbootctl` dependency (above).
+
+### Battery percentage is inaccurate after a flat discharge
+
+The `pmi8998_fg` driver reads the state-of-charge directly from the fuel-gauge hardware
+register; it does **not** use a DT OCV table, so adding `ocv-capacity-table` has no effect.
+After the battery dies flat the FG loses its reference and the percentage sticks/jumps until a
+full charge cycle recalibrates it. A proper fix would require loading the device battery
+profile into the FG SRAM (mainline does not do this yet).
+
+### Touchscreen (Himax HX83112A) — WIP
+
+The touch IC is a Himax HX83112A on i2c-0 (`c175000.i2c`) at address **0x48** (irq gpio67,
+reset gpio66) and reports product id **0x83112a**. The mainline `himax_hx83112b` driver only
+knows id `0x83112b`; a DT node with `compatible = "himax,hx83112a"` plus a matching chip
+variant read the IC correctly but the wrong chip variant got bound and probe failed. Parked;
+not needed for headless use.
 
 ## Notes
 
-- Touch is in-cell with the HX83112A panel; mainline support is limited and not needed for
-  a headless server use case.
-- WiFi/BT use the same WCN3990 as the Mi A2; expected to work once firmware/calibration is
-  in place (firmware lives in the rootfs, so it is absent during `fastboot boot` probes).
+- The display works via the bootloader-provided simple-framebuffer; the mainline DSI panel
+  driver for the HX83112A 2160-line variant is not wired up yet.
+- WiFi/BT use the same WCN3990 as the Mi A2. The firmware (`board-2.bin`) lives in the rootfs
+  (`firmware-vsmart-zangyapro`), so it is absent during `fastboot boot` probes.

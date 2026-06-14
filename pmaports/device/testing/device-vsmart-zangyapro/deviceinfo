@@ -13,6 +13,7 @@ deviceinfo_flash_kernel_on_update="true"
 
 # Device related
 deviceinfo_drm="true"
+deviceinfo_gpu_accelerated="true"
 deviceinfo_chassis="handset"
 deviceinfo_screen_width="1080"
 deviceinfo_screen_height="2160"

@@ -1,12 +1,19 @@
-From a6fa5a8dcea904fafed35a35613ceaf2b2fd8eff Mon Sep 17 00:00:00 2001
-From: active1-pmos <dev@example.com>
-Date: Sat, 13 Jun 2026 19:31:14 +0000
+From 0df1b8518210cf69ea387e1f68cc05120ac86941 Mon Sep 17 00:00:00 2001
+From: fudio101 <thenguyen1024@gmail.com>
+Date: Sun, 14 Jun 2026 07:33:44 +0000
 Subject: [PATCH] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
 
+The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro built
+on the Qualcomm SDM660. Add a device tree derived from the Xiaomi Mi A2
+(sdm660-xiaomi-jasmine) enabling eMMC, USB, UART, WCN3990 Bluetooth, the
+Adreno 512 GPU (zap shader), the PMIC (charger, fuel gauge, power and
+volume keys) and the bootloader-provided simple-framebuffer.
+
+Signed-off-by: fudio101 <thenguyen1024@gmail.com>
 ---
  arch/arm64/boot/dts/qcom/Makefile             |   1 +
- .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 631 ++++++++++++++++++
- 2 files changed, 632 insertions(+)
+ .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 620 ++++++++++++++++++
+ 2 files changed, 621 insertions(+)
  create mode 100644 arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 
 diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
@@ -23,10 +30,10 @@ index bada54a0e..1e8348906 100644
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-lavender-boe.dtb
 diff --git a/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 new file mode 100644
-index 000000000..34199100c
+index 000000000..564b09c49
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
-@@ -0,0 +1,631 @@
+@@ -0,0 +1,620 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
 +/*
 + * Copyright (c) 2022, Joe Mason <buddyjojo06@outlook.com>
@@ -174,23 +181,12 @@ index 000000000..34199100c
 +	};
 +};
 +
-+&blsp_i2c1 {
-+	status = "okay";
-+
-+	touchscreen@1 {
-+		compatible = "novatek,nt36672a-ts";
-+		reg = <0x1>;
-+		iovcc-supply = <&vreg_l11a_1p8>;
-+		interrupts-extended = <&tlmm 67 IRQ_TYPE_EDGE_RISING>;
-+		panel = <&panel>;
-+		pinctrl-names = "default", "sleep";
-+		pinctrl-0 = <&ts_pins_active>;
-+		pinctrl-1 = <&ts_int_sleep &ts_rst_sleep>;
-+		reset-gpios = <&tlmm 66 GPIO_ACTIVE_LOW>;
-+		touchscreen-size-x = <1080>;
-+		touchscreen-size-y = <2160>;
-+	};
-+};
++/*
++ * Touchscreen is parked. The Active 1 has a Himax HX83112A (i2c-0 @ 0x48,
++ * irq gpio67, reset gpio66) - NOT the Mi A2's Novatek. The inherited Novatek
++ * node only spammed i2c errors, so the touch bus is left disabled for now.
++ * To resume the Himax port see docs/porting-notes.md (IC product id 0x83112a).
++ */
 +
 +&mdss {
 +	status = "okay";

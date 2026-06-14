@@ -13,9 +13,12 @@ the pmOS rootfs without ever touching android-verity. No lk2nd needed.
 
 ## Status
 
-Active 1 has been **confirmed to boot mainline Linux** (eMMC HS400, USB networking, framebuffer
-console, charging). A dedicated `vsmart-zangyapro` device is being packaged. See
-[`docs/porting-notes.md`](docs/porting-notes.md) and [`docs/hardware.md`](docs/hardware.md).
+Running as a **headless home server**. Working: boot (eMMC HS400), USB + WiFi networking,
+Bluetooth, **GPU** (Adreno 512 / freedreno), SSH, framebuffer console, charging (with a ≥2 A
+charger), and A/B-slot survival across reboots (`qbootctl`). Known issues: a soft reboot hangs
+(cold-boot only) and the touchscreen is parked. See
+[`docs/porting-notes.md`](docs/porting-notes.md), [`docs/hardware.md`](docs/hardware.md) and
+[`docs/connecting.md`](docs/connecting.md).
 
 ## Layout (mirrors upstream paths)
 
@@ -54,11 +57,19 @@ password `147147`, hostname `vsmart-zangyapro`, console UI, SSH enabled, kernel 
 
 ## Upstreaming / publishing
 
-- **Device package:** copy `pmaports/device/testing/device-vsmart-zangyapro/` into a
-  [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout and open a merge
-  request (see `COMMITSTYLE.md` / `docs/packaging-guidelines.md` there).
-- **Kernel:** submit `kernel/*.patch` to the SDM660 kernel tree.
-- **Wiki:** publish `wiki/Vsmart_Active_1.md`.
+The port is two upstream contributions, in order:
+
+1. **Kernel device tree** — submit `kernel/0001-arm64-dts-qcom-sdm660-add-vsmart-active1.patch`
+   to the SDM660 kernel tree ([sdm660-mainline/linux](https://github.com/sdm660-mainline/linux))
+   and/or mainline. The pmaports kernel package builds from a release tarball, so the `.dts`
+   must land there first. The patch already carries a proper subject + `Signed-off-by`.
+2. **pmaports packages** — once a kernel tag ships the dtb, copy
+   `pmaports/device/testing/device-vsmart-zangyapro/` and
+   `pmaports/device/testing/firmware-vsmart-zangyapro/` into a
+   [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout and open a merge
+   request (follow `COMMITSTYLE.md` there). `firmware-vsmart-zangyapro` ships the device-specific
+   binary blobs (WCN3990 `board-2.bin`, Adreno 512 `a512_zap.mbn`).
+3. **Wiki** — publish `wiki/Vsmart_Active_1.md`.
 
 ## Environment notes
 

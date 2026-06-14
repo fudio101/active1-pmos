@@ -13,3 +13,8 @@ package() {
 	install -Dm644 "$srcdir"/firmware-5.bin "$pkgdir"/lib/firmware/ath10k/WCN3990/hw1.0/firmware-5.bin
 	install -Dm644 "$srcdir"/a512_zap.mbn   "$pkgdir"/lib/firmware/postmarketos/a512_zap.mbn
 }
+sha512sums="
+424d328ebc8cf56d2112f687ab4f175cdf97cb8eac37e9390b6aeee87c022c6b97b7ad29cb2a1b955a781df02a88cff900cd1495bbcda9029af86754289fefe4  board-2.bin
+1aa4dc7ffa00179d672fd4e28a19802b1f373db6184d622fac6d5935832554d3c2ac07653abf9f51a95198f15b458dc0d89c8f7618b817363932b9b83f454e7d  firmware-5.bin
+ba4a50c62c0811a25402da41f3f22d5f4847ecd196ecbbc7c084cfd3521a5180cfcd0a81ac2aeab323e6d8c7682b5342dcaaf4f7410f2493dc20b33da2a56d17  a512_zap.mbn
+"
