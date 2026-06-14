@@ -112,7 +112,9 @@ Takeaway for the headless server: power it from a 2A+ wall charger, never a lapt
   (e.g. 1.41 A x 4.71 V in, 1.08 A x 3.98 V into battery -> 6.65 - 4.30 = 2.35 W). Heavy CPU
   load pushes it to ~4-5 W.
 - Battery runtime on battery alone (built-in UPS): ~4.5 h from 100 %, ~3.5 h from 80 %
-  (3000 mAh, ~2.4 W idle).
+  (3000 mAh design, ~2.4 W idle). NOTE: indicative only - this is a used unit with a
+  degraded (worn) battery, so real usable capacity is below 3000 mAh and these runtimes are
+  optimistic; a healthy battery will differ.
 - Charging: a weak/laptop SDP port is capped ~450 mA -> net discharge while running; a 2 A DCP
   wall charger gives ICL 1.5 A and ~1.1 A into the battery while running (charge ~40-55 %/h in
   the low-SoC region).

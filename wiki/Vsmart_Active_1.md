@@ -98,7 +98,10 @@ sequentially; a USB-2.0 hub improves stability.
 - **Power draw** (idle: WiFi + Bluetooth + console) is about **2.4 W**, measured from the
   charger input minus the battery charge power. Under heavy CPU load it rises to ~4-5 W.
 - The 3000 mAh battery is effectively a **built-in UPS**: at idle it lasts roughly **~4.5 h
-  from 100 %** (~3.5 h from 80 %) on battery alone during a power cut.
+  from 100 %** (~3.5 h from 80 %) on battery alone during a power cut. **These figures are only
+  indicative** — they were derived on a used unit whose battery is degraded (worn), so its real
+  usable capacity is below the 3000 mAh design and the runtime computed from the design figure
+  is optimistic; a device with a healthy battery will differ.
 - **Charging needs a real ≥2 A wall charger.** BC1.2 detection works: a weak/laptop (SDP) port
   is capped at ~450 mA, which is *less* than the running load, so the battery slowly drains
   even while "Charging". A 2 A DCP charger pulls ~1.5 A and charges at ~1.1 A while running.
