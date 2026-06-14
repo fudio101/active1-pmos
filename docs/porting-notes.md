@@ -1,66 +1,49 @@
 # Porting notes / status
 
-## Done
-- [x] Proved the Active 1 boots mainline Linux (probe: `fastboot boot` of the jasmine kernel) —
-      storage/USB/network/console OK, verity bypassed.
-- [x] pmbootstrap 3.10.1 set up (WSL2; passwordless sudo, kpartx, dtc installed).
-- [x] Kernel source at `~/linux-sdm660` (tag v6.19.10-sdm660).
-- [x] `sdm660-vsmart-zangyapro.dts` (iteration 1: jasmine copy with renamed model/compatible)
-      + Makefile entry.
-- [x] Device package `device-vsmart-zangyapro` (deviceinfo/APKBUILD/modules-initfs), checksummed,
-      device + user configured.
-- [x] Stock dtb extracted -> touch/panel/WiFi values (see hardware.md).
-- [x] Project organised (upstream-mirroring layout) with `dev.sh`.
+Technical bring-up record for the Vsmart Active 1 (vsmart-zangyapro) pmOS port. The user-facing
+summary lives in [`../wiki/Vsmart_Active_1.md`](../wiki/Vsmart_Active_1.md) and
+[`../README.md`](../README.md); this file keeps the deeper findings and the resume instructions
+for the open items.
 
-## In progress
-- [ ] First kernel build with the zangyapro dts (`./dev.sh build`).
-
-## Next (iteration 1 - base server)
-- [ ] `./dev.sh install` -> rootfs + boot image.
-- [ ] `./dev.sh export`.
-- [ ] Phone to fastboot -> `./dev.sh flash` (overwrites boot_a + userdata).
-- [ ] Reboot -> `./dev.sh ssh` (fudio101@172.16.42.1, password 147147).
-- [ ] Verify: storage mount, networking, whether WiFi/BT come up.
-
-## Iteration 2 - hardware completion
-- [ ] WiFi/BT (WCN3990): check after install; if absent, add firmware/calibration + enable nodes.
-- [ ] Panel HX83112A: add the DRM panel node (DJN timings) if a real display is wanted.
-- [ ] Touch (Himax): skip for headless unless genuinely needed.
-- [ ] Clean the dts: drop jasmine-only nodes (nt36672a panel/touch) to remove error spam,
-      add a proper SPDX/copyright header before upstreaming.
+## Status
+- Boots mainline Linux; the bootloader's android-verity / `skip_initramfs` cmdline is ignored by
+  the mainline kernel, so no verity workaround / lk2nd is needed.
+- **Working:** eMMC (HS400, ~50 G auto-expanded root + zram swap), USB + WiFi networking,
+  Bluetooth (WCN3990), GPU (Adreno 512 / freedreno FD512), SSH, framebuffer console, charging
+  (with a ≥2 A charger), A/B-slot survival across reboots (`qbootctl`).
+- **Open:** soft reboot hangs (cold-boot only); touchscreen parked; the DRM panel node is not
+  wired up (console uses the bootloader simple-framebuffer); per-device WiFi MAC is random;
+  modem untested.
+- **Firmware:** WiFi `board-2.bin` + GPU `a512_zap.mbn` ship in the local
+  `firmware-vsmart-zangyapro` package (a hard dependency of `device-vsmart-zangyapro`); the
+  Adreno a530 microcode comes from `firmware-qcom-adreno-a530`.
 
 ## Tips
 - Dev loop: edit `kernel/sdm660-vsmart-zangyapro.dts` -> `./dev.sh all` -> `./dev.sh flash`.
-- Non-destructive test: `./dev.sh bootboot /tmp/pmos-export/boot.img`.
-- WSL flashing: `FASTBOOT=/mnt/c/adb/fastboot.exe ./dev.sh flash`, or use usbipd-win, or move
-  to a native Linux/macOS host.
+- Non-destructive kernel test: `./dev.sh bootboot /tmp/pmos-export/boot.img`.
+- WSL flashing: `FASTBOOT=/mnt/c/adb/fastboot.exe ./dev.sh flash`. Large `userdata` transfers
+  fail over 32-bit `fastboot.exe`; split into ~20 MB sparse chunks (`img2simg` + `simg2simg`)
+  and flash sequentially.
 - Regenerate the kernel patch for upstreaming: `./dev.sh patch`.
+- If `pmbootstrap install` fails with exit 125 (`busybox su pmos ... mkdir rootfs`), run
+  `pmbootstrap shutdown` and retry (re-registers the qemu binfmt).
 
-## UPDATE: iteration 1 complete + WiFi/BT working (2026-06-14)
-- pmOS boots; SSH up (fudio101@172.16.42.1 over USB, 192.168.1.2 over WiFi).
-- Storage: 50.5G root (auto-expanded) + 5.3G zram swap.
-- Bluetooth: hci0 (WCN3990) up.
-- WiFi: wlan0 works (scans 2.4+5GHz, connected to LAN with internet).
-- Fix: device package now depends on firmware-xiaomi-jasmine_sprout (WCN3990 board-2.bin).
-- Remaining: per-device WiFi MAC (currently random); avoid 'press power' on reboot (AVB).
-
-## UPDATE: GPU working (2026-06-14)
-- Mesa freedreno reports FD512 (hardware accel, not llvmpipe).
-- Fix: a512_zap.mbn (Adreno 512 zap shader, extracted from stock vendor_a/firmware/a512_zap.elf) added to firmware-vsmart-zangyapro.
-- Cosmetic: a530_pm4.fw early-load warning at boot (deferred fallback succeeds).
-
-## UPDATE: GPU render confirmed via benchmark (2026-06-14)
-- glmark2-es2-drm (real GPU submit to panel): GL_RENDERER=FD512, Mesa 26.1.1 (GLES 3.1).
-  build 677 FPS, texture 413 FPS, shading 451 FPS, **glmark2 Score: 512** (hardware, not llvmpipe).
-- Headless: EGL_PLATFORM=surfaceless and =device both report freedreno/FD512, so the GPU is
-  usable without a display (renderD128) for any future Wayland compositor.
+## GPU (Adreno 512) — works
+- Mesa freedreno reports **FD512** (hardware accel, not llvmpipe).
+- Fix: `a512_zap.mbn` (Adreno 512 zap shader, extracted from the stock
+  `vendor_a/firmware/a512_zap.elf`) added to `firmware-vsmart-zangyapro`.
+- Render confirmed: `glmark2-es2-drm` -> GL_RENDERER=FD512, Mesa 26.1.1 (GLES 3.1),
+  **glmark2 Score 512** (build 677 / texture 413 / shading 451 FPS), 3D visibly rendered on the
+  panel. Headless: `EGL_PLATFORM=surfaceless` and `=device` both report freedreno/FD512, so the
+  GPU is usable without a display (renderD128) for any future Wayland compositor.
+- Cosmetic: an `a530_pm4.fw` early-load warning at boot; the deferred fallback load succeeds.
 
 ## KNOWN ISSUE: unattended/soft reboot hangs (NOT yet fixed)
 Symptom: `reboot` (or any soft reboot) -> bootloader -> pmOS splash -> black screen -> hang;
 never reaches SSH. Only recovery is hold-Power (force power-off) then power on (cold boot).
 Cold boot from power button always works. Blocks fully-headless reboots.
 
-Investigation (2026-06-14):
+Investigation:
 - Restart handler: PSCI (prio 129) wins over PS_HOLD/msm-poweroff (prio 128).
 - Root-cause candidate: PMIC pm660 PON PS_HOLD reset type was WARM_RESET (reg 0x85a=0x01).
   A warm reset restarts the CPUs but does NOT power-cycle peripherals (eMMC, remoteprocs,
@@ -93,21 +76,23 @@ To resume: add `static const struct himax_chip hx83112a_chip = { .id = 0x83112a,
 (reg 0x48, irq gpio67 LEVEL_LOW, reset gpio66, size 1080x2160). Verify the right chip
 variant is bound before debugging the protocol.
 
-## FIX: A/B boot-slot retry -> dropped to fastboot (2026-06-14)
+## FIX: A/B boot-slot retry -> dropped to fastboot
 A/B device. pmOS did not mark the slot successful, so the bootloader decremented slot_a retry
 on each boot/power-cycle until it hit 0 -> slot unbootable -> dropped to fastboot (seen after the
-battery drained flat and the device power-cycled). Recovery: fastboot set_active a ; fastboot reboot.
-Permanent fix (baked in): added qbootctl to device-vsmart-zangyapro depends; its qbootctl.service
-runs qbootctl -m at boot to mark the slot successful. Verified Successful=1 on slot _a.
+battery drained flat and the device power-cycled). Recovery: `fastboot set_active a ; fastboot
+reboot`. Permanent fix (baked in): added `qbootctl` to device-vsmart-zangyapro depends; its
+qbootctl.service runs `qbootctl -m` at boot to mark the slot successful. Verified Successful=1
+on slot _a.
 
 ## NOTE: charging works, but needs a strong charger (mainline pm660 charger)
-Charger-type detection works (BC1.2): laptop/weak port -> SDP, input capped ~450mA; a real fast
-wall charger -> DCP, input 1.5A. At 450mA the running load (CPU+WiFi+BT, ~0.5A) exceeds input so
-the battery NET-DISCHARGES even while "Charging" (this is why it died plugged into a weak port).
-On a 2A+ DCP charger: current_max=1.5A, battery current_now ~+1.15A = charges fine while running.
-Takeaway for the headless server: power it from a 2A+ wall charger, never a laptop/weak USB port.
+Charger-type detection works (BC1.2): laptop/weak port -> SDP, input capped ~450 mA; a real fast
+wall charger -> DCP, input 1.5 A. At 450 mA the running load (CPU+WiFi+BT, ~0.5 A) exceeds input
+so the battery NET-DISCHARGES even while "Charging" (this is why it died plugged into a weak
+port). On a 2 A+ DCP charger: current_max=1.5 A, battery current_now ~+1.15 A = charges fine
+while running. Takeaway for the headless server: power it from a 2 A+ wall charger, never a
+laptop/weak USB port.
 
-## Device measurements (2026-06-14, idle: WiFi+BT+console)
+## Device measurements (idle: WiFi+BT+console)
 - Power draw ~2.4 W, measured as charger input power minus battery charge power
   (e.g. 1.41 A x 4.71 V in, 1.08 A x 3.98 V into battery -> 6.65 - 4.30 = 2.35 W). Heavy CPU
   load pushes it to ~4-5 W.
@@ -122,6 +107,9 @@ Takeaway for the headless server: power it from a 2A+ wall charger, never a lapt
 - Charger driver qcom_smbx DOES read constant-charge-current/voltage and voltage-max-design from
   the battery DT, but the defaults (ICL/FCC 1.5 A, CV 4.4 V from voltage-max-design) are already
   sensible, so no extra charge-limit DT fields were added (would be redundant).
+- Battery percentage: the pmi8998_fg driver reads SoC straight from the FG hardware register
+  (BATT_MONOTONIC_SOC); it does NOT use a DT OCV table, so adding `ocv-capacity-table` has no
+  effect. After a flat discharge the % sticks/jumps until a full charge cycle recalibrates it.
 
 ## Protecting the local packages from apk
 device/firmware/kernel are local builds, absent from any public repo, so
