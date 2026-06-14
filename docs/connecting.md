@@ -94,11 +94,12 @@ ssh fudio101@<wifi-ip>
 
 ## 3. Bluetooth keyboard
 
-WiFi and Bluetooth share the same WCN3990 chip; both work on mainline.
+WiFi and Bluetooth share the same WCN3990 chip; both work on mainline. **Bluetooth auto-starts
+at boot** (the `device-vsmart-zangyapro` package enables `bluetooth.service`), so go straight to
+`bluetoothctl` — no need to start it. If the controller reports off, unblock it once with
+`sudo rfkill unblock bluetooth`.
 
 ```sh
-sudo rfkill unblock bluetooth
-sudo systemctl start bluetooth          # (systemd image)  -- or: sudo rc-service bluetooth start
 bluetoothctl
 ```
 Inside the `bluetoothctl` prompt:

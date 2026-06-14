@@ -3,7 +3,7 @@
 SoC **Qualcomm SDM660**, PMIC **PM660 + PM660L**, A/B partitions, eMMC.
 Nearly identical to the **Xiaomi Mi A2 (jasmine)** — `sdm660-xiaomi-jasmine.dts` is the base.
 
-## Confirmed working (probe: jasmine kernel via `fastboot boot`)
+## Core blocks (confirmed working on the port)
 | Block | Status | Notes |
 |---|---|---|
 | CPU | OK | 8 cores, aarch64 |
@@ -11,14 +11,17 @@ Nearly identical to the **Xiaomi Mi A2 (jasmine)** — `sdm660-xiaomi-jasmine.dt
 | eMMC | OK | HS400, 58.2 GiB, `mmcblk1`, controller `c0c4000.mmc` |
 | USB | OK | NCM gadget; host 172.16.42.2, phone 172.16.42.1 |
 | Framebuffer console | OK | `simple-framebuffer` @ 0x9d400000, 1080x2160 a8r8g8b8 |
-| Charger / battery | OK | `pm660-charger` + `qcom-battery` |
+| Charger / battery | OK | `pm660-charger` + `qcom-battery` (PMI8998 FG); needs a >=2 A charger |
 
-## To do (iteration 2) — values from the stock dtb (`/tmp/dtbs`, 111 dtbs)
-| Block | Stock value | Mainline plan |
+## Peripherals (status + reference values)
+Stock values were read from the stock dtb (`/tmp/dtbs`). See `porting-notes.md` for the
+bring-up details and the open items.
+| Block | Reference values | Status |
 |---|---|---|
-| WiFi/BT | `qca,wcn3990` + `qcom,icnss` | Same as jasmine; node already present. Needs firmware (in rootfs), so absent during `fastboot boot`. Likely works after a full install; calibration/MAC may need a partition. |
-| Panel | "DJN hx83112a 1080p video mode" | Driver `panel-himax-hx83112a.c` exists; add the panel node + DJN timings. (Console already works via simplefb.) |
-| Touch | `himax,hxcommon` in-cell, irq-gpio 67, rst-gpio 66 | Weak mainline Himax touch support; not needed for a headless server. |
+| WiFi/BT | `qca,wcn3990` + `qcom,icnss`; firmware `board-2.bin` (ath10k WCN3990) | **Works** (firmware ships in `firmware-vsmart-zangyapro`; absent during `fastboot boot`). MAC is random. |
+| GPU | Adreno 512; zap shader `a512_zap.mbn` (from stock `vendor_a/firmware/a512_zap.elf`) | **Works** (freedreno FD512); firmware in `firmware-vsmart-zangyapro`. |
+| Panel | "DJN hx83112a 1080p video mode" | Console via simplefb works; **DRM DSI panel node not wired up** (the mainline HX83112A driver targets a 2340-line variant). |
+| Touch | Himax **HX83112A** TDDI, i2c-0 @ **0x48**, irq gpio67, rst gpio66, product id **0x83112a** | **WIP / parked** — mainline `himax_hx83112b` only knows id 0x83112b; needs an hx83112a variant. |
 | Fingerprint | `goodix,fingerprint` | Not needed |
 
 ## Verified boot / why pmOS boots and Android GSIs don't
