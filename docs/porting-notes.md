@@ -11,9 +11,9 @@ for the open items.
 - **Working:** eMMC (HS400, ~50 G auto-expanded root + zram swap), USB + WiFi networking,
   Bluetooth (WCN3990), GPU (Adreno 512 / freedreno FD512), SSH, framebuffer console, charging
   (with a ≥2 A charger), A/B-slot survival across reboots (`qbootctl`).
-- **Open:** soft reboot hangs (cold-boot only); touchscreen parked; the DRM panel node is not
-  wired up (console uses the bootloader simple-framebuffer); per-device WiFi MAC is random;
-  modem untested.
+- **Open:** touchscreen parked; the DRM panel node is not wired up (console uses the bootloader
+  simple-framebuffer); per-device WiFi MAC is random; modem untested. (Soft reboot, previously
+  thought broken, now works on a healthy battery — see the reboot note below.)
 - **Firmware:** WiFi `board-2.bin` + GPU `a512_zap.mbn` ship in the local
   `firmware-vsmart-zangyapro` package (a hard dependency of `device-vsmart-zangyapro`); the
   Adreno a530 microcode comes from `firmware-qcom-adreno-a530`.
@@ -38,27 +38,29 @@ for the open items.
   GPU is usable without a display (renderD128) for any future Wayland compositor.
 - Cosmetic: an `a530_pm4.fw` early-load warning at boot; the deferred fallback load succeeds.
 
-## KNOWN ISSUE: unattended/soft reboot hangs (NOT yet fixed)
-Symptom: `reboot` (or any soft reboot) -> bootloader -> pmOS splash -> black screen -> hang;
-never reaches SSH. Only recovery is hold-Power (force power-off) then power on (cold boot).
-Cold boot from power button always works. Blocks fully-headless reboots.
+## Soft reboot — most likely a low-power (brownout) issue, not a peripheral hang
+Earlier symptom: `reboot` (or any soft reboot) -> bootloader -> pmOS splash -> black screen ->
+hang; never reaches SSH, only a hold-Power cold boot recovered it. At the time this happened
+**consistently** -- but always while the battery was draining on a weak (SDP, ~450 mA) charger
+and it eventually died flat.
 
-Investigation:
+**Update: with a healthy battery (>90 %) on a 2 A wall charger, `reboot` AND `poweroff` both
+complete normally and the device comes back up on its own.** So the "hang" was very likely a
+**brownout / insufficient power during the warm reboot**, not the peripheral/reset-type theory
+below. This also explains why the PS_HOLD HARD_RESET patch did not help (it addressed reset
+type, not power). **Confirmed on the standard rebuild:** `sudo systemctl reboot` at 91 %
+battery came back unattended (new boot_id, no power button), and WiFi/Tailscale/BT/GPU all
+survived.
+
+Practical guidance: power the device from a 2 A+ charger; a reboot on a weak/low battery may
+still brown out. If a true hang ever recurs on a *charged* device, resume the old investigation:
+verbose boot image (drop `quiet splash`, add `ignore_loglevel`) and read the panel at the hang.
+
+Historical investigation (PS_HOLD theory, now believed not the cause):
 - Restart handler: PSCI (prio 129) wins over PS_HOLD/msm-poweroff (prio 128).
-- Root-cause candidate: PMIC pm660 PON PS_HOLD reset type was WARM_RESET (reg 0x85a=0x01).
-  A warm reset restarts the CPUs but does NOT power-cycle peripherals (eMMC, remoteprocs,
-  SMMU), so the 2nd boot hangs on dirty hardware. Cold boot power-cycles everything -> clean.
-- Tried fix (REVERTED, did not work): patched qcom-pon.c to set PS_HOLD reset type =
-  HARD_RESET (0x85a=0x07, confirmed active via regmap debugfs + dmesg "PS_HOLD configured for
-  hard reset") and bumped msm-poweroff restart priority 128->130 so PS_HOLD beats PSCI.
-  Even with hard reset active, `reboot` still hung -> so the warm-vs-hard reset type is NOT
-  the (only) cause. Reverted both kernel edits.
-- Next ideas to try: (a) verbose boot image (drop `quiet splash`, add `ignore_loglevel`) and
-  photograph the panel at the hang to localize the stuck driver; (b) suspect eMMC/sdhci or a
-  remoteproc not re-initialising on the 2nd boot; (c) check whether the bootloader takes a
-  different path on a warm boot. ramoops (ramoops@a0000000) is wiped by the forced cold boot,
-  so it cannot capture the hang.
-Workaround for now: treat as a cold-boot-only device; avoid soft reboots.
+- The PMIC pm660 PON PS_HOLD reset type was WARM_RESET (reg 0x85a=0x01). Patched qcom-pon.c to
+  set HARD_RESET (0x85a=0x07, confirmed active) and bumped msm-poweroff priority 128->130 so
+  PS_HOLD beats PSCI; `reboot` still hung, so reset type was not the cause. Both edits reverted.
 
 ## KNOWN ISSUE: touchscreen (Himax HX83112A) - WIP, parked
 Hardware confirmed working at the bus level:

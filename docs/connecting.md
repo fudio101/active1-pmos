@@ -130,4 +130,4 @@ box where you occasionally want a local keyboard at the console (tty1).
 | Connect WiFi | `nmcli dev wifi connect "SSID" password "PASS"` |
 | WiFi IP | `nmcli -g IP4.ADDRESS dev show wlan0` |
 | Pair BT keyboard | `bluetoothctl` → `scan on` → `pair/trust/connect <MAC>` |
-| Reboot caveat | soft reboot hangs — power-cycle (hold Power, then power on) |
+| Reboot | works on a healthy battery; keep on a 2 A+ charger (low battery may brown out) |

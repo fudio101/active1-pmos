@@ -56,7 +56,7 @@ small **headless home server**.
 | Charging (PM660) | Works (needs a ≥2 A charger; reporting WIP) |
 | Battery percentage (PMI8998 FG) | Partial (recalibrates over a charge cycle) |
 | A/B slot survival across reboots | Works (via `qbootctl`) |
-| Soft / unattended reboot | Broken (cold-boot only, see Known issues) |
+| Soft / unattended reboot | Works on a healthy battery (earlier hangs were a low-power brownout) |
 | Modem (calls/SMS/data) | Untested |
 
 ## Unlocking the bootloader
@@ -113,17 +113,15 @@ sequentially; a USB-2.0 hub improves stability.
 
 ## Known issues
 
-### Soft / unattended reboot hangs (cold-boot only)
+### Soft reboot — needs adequate power (earlier "hang" was a brownout)
 
-`reboot` (or any software-initiated reboot) restarts into the bootloader and the pmOS splash,
-then the screen goes black and the boot hangs before SSH comes up. Recovery: hold **Power** to
-force the device off, then power it on again (a cold boot always works). A soft reboot does a
-*warm* reset (CPUs restart but peripherals keep their state); a full power cycle clears it.
-Forcing the PMIC PS_HOLD reset type to HARD_RESET (and outranking the PSCI restart handler) was
-tried and did **not** fix it, so the reset *type* is not the (only) cause. `ramoops` is wiped
-by the forced cold boot, so the hang is not captured. Next step: a verbose boot image (drop
-`quiet splash`, add `ignore_loglevel`) and read the panel at the hang. See
-`docs/porting-notes.md`.
+Early on, `reboot` consistently hung after the splash (black screen, no SSH) and only a
+hold-Power cold boot recovered it — but always while the battery was draining on a weak
+(~450 mA) charger and eventually died flat. With a **healthy battery on a 2 A wall charger,
+`reboot` and `poweroff` both complete normally** and the device comes back on its own. The
+hang was therefore most likely a brownout during the warm reboot, not a driver issue (which is
+why the PMIC PS_HOLD HARD_RESET patch did not help). Keep the device on a 2 A+ charger; a reboot
+on a low/weak battery may still fail. See `docs/porting-notes.md`.
 
 ### Dropped to fastboot after running flat
 

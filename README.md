@@ -15,10 +15,11 @@ the pmOS rootfs without ever touching android-verity. No lk2nd needed.
 
 Running as a **headless home server**. Working: boot (eMMC HS400), USB + WiFi networking,
 Bluetooth, **GPU** (Adreno 512 / freedreno), SSH, framebuffer console, charging (with a ≥2 A
-charger), and A/B-slot survival across reboots (`qbootctl`). Known issues: a soft reboot hangs
-(cold-boot only) and the touchscreen is parked. See
-[`docs/porting-notes.md`](docs/porting-notes.md), [`docs/hardware.md`](docs/hardware.md) and
-[`docs/connecting.md`](docs/connecting.md).
+charger), and A/B-slot survival across reboots (`qbootctl`). Soft reboot — once thought broken
+— works on a healthy battery (the earlier hangs were a low-power brownout). Known issue: the
+touchscreen is parked. See
+[`docs/porting-notes.md`](docs/porting-notes.md), [`docs/hardware.md`](docs/hardware.md),
+[`docs/connecting.md`](docs/connecting.md) and [`docs/cheatsheet.md`](docs/cheatsheet.md).
 
 ## Layout (mirrors upstream paths)
 
