@@ -1,6 +1,6 @@
-From 0df1b8518210cf69ea387e1f68cc05120ac86941 Mon Sep 17 00:00:00 2001
+From e08419db4a651a1ee4bd2cb4ab6c78f17bb65052 Mon Sep 17 00:00:00 2001
 From: fudio101 <thenguyen1024@gmail.com>
-Date: Sun, 14 Jun 2026 07:33:44 +0000
+Date: Sun, 14 Jun 2026 09:08:12 +0000
 Subject: [PATCH] arm64: dts: qcom: sdm660: add Vsmart Active 1 (zangyapro)
 
 The Vsmart Active 1 (PQ6001) is a rebrand of the BQ Aquaris X2 Pro built
@@ -9,11 +9,15 @@ on the Qualcomm SDM660. Add a device tree derived from the Xiaomi Mi A2
 Adreno 512 GPU (zap shader), the PMIC (charger, fuel gauge, power and
 volume keys) and the bootloader-provided simple-framebuffer.
 
+The Himax HX83112A DSI panel and its in-cell touch are not yet wired up
+(no mainline driver for this variant), so the console uses the simple
+framebuffer for now.
+
 Signed-off-by: fudio101 <thenguyen1024@gmail.com>
 ---
  arch/arm64/boot/dts/qcom/Makefile             |   1 +
- .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 620 ++++++++++++++++++
- 2 files changed, 621 insertions(+)
+ .../boot/dts/qcom/sdm660-vsmart-zangyapro.dts | 534 ++++++++++++++++++
+ 2 files changed, 535 insertions(+)
  create mode 100644 arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 
 diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
@@ -30,12 +34,15 @@ index bada54a0e..1e8348906 100644
  dtb-$(CONFIG_ARCH_QCOM)	+= sdm660-xiaomi-lavender-boe.dtb
 diff --git a/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
 new file mode 100644
-index 000000000..564b09c49
+index 000000000..d5f712d1d
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/sdm660-vsmart-zangyapro.dts
-@@ -0,0 +1,620 @@
+@@ -0,0 +1,534 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
 +/*
++ * Copyright (c) 2026, fudio101 <thenguyen1024@gmail.com>
++ *
++ * Derived from sdm660-xiaomi-jasmine.dts
 + * Copyright (c) 2022, Joe Mason <buddyjojo06@outlook.com>
 + */
 +
@@ -89,23 +96,6 @@ index 000000000..564b09c49
 +		regulator-min-microvolt = <3700000>;
 +		regulator-max-microvolt = <3700000>;
 +
-+		regulator-always-on;
-+		regulator-boot-on;
-+	};
-+
-+	/*
-+	 * This is here until we have a driver for QPNP LCDB regulator.
-+	 * It can emulate both positive LDO and negative NCP supplies for panel.
-+	 */
-+	lcdb_fixed: lcdb-regulator {
-+		compatible = "regulator-fixed";
-+		regulator-name = "lcdb";
-+		/*
-+		 * Actual range for LCDB is 4.0 - 6.0V, but
-+		 * stock bootloader sets voltage to 5.4 V
-+		 */
-+		regulator-min-microvolt = <5400000>;
-+		regulator-max-microvolt = <5400000>;
 +		regulator-always-on;
 +		regulator-boot-on;
 +	};
@@ -176,8 +166,6 @@ index 000000000..564b09c49
 +		vddch0-supply = <&vreg_l19a_3p3>; // vdd-ldo-supply
 +		vddio-supply = <&vreg_l13a_1p8>; // chip-pwd-supply ? // TODO: check
 +		max-speed = <3200000>;
-+		/* Path is relative to the qca/ subdir in lib/firmware. */
-+		/* firmware-name = "crnv21.bin"; */ // default
 +	};
 +};
 +
@@ -192,48 +180,13 @@ index 000000000..564b09c49
 +	status = "okay";
 +};
 +
-+&mdss_dsi0 {
-+	status = "okay";
-+
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+
-+	vdd-supply = <&vreg_l1b_0p925>;
-+	vdda-supply = <&vreg_l1a_1p225>;
-+
-+	panel: panel@0 {
-+		compatible = "tianma,tl060fvxs16-00", "novatek,nt36672a";
-+		reg = <0>;
-+
-+		reset-gpios = <&tlmm 53 GPIO_ACTIVE_LOW>;
-+
-+		vddio-supply = <&vreg_l11a_1p8>;
-+		vddneg-supply = <&lcdb_fixed>;
-+		vddpos-supply = <&lcdb_fixed>;
-+
-+		backlight = <&pm660l_wled>;
-+
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&panel_reset_n &mdp_vsync_n>;
-+
-+		port {
-+			panel_in: endpoint {
-+				remote-endpoint = <&mdss_dsi0_out>;
-+			};
-+		};
-+	};
-+};
-+
-+&mdss_dsi0_out {
-+	data-lanes = <0 1 2 3>;
-+	remote-endpoint = <&panel_in>;
-+};
-+
-+&mdss_dsi0_phy {
-+	vcca-supply = <&vreg_l1b_0p925>;
-+
-+	status = "okay";
-+};
++/*
++ * The DSI panel is a Himax HX83112A (1080x2160, DJN) which has no mainline
++ * driver yet, so the DSI output is left disabled and the console uses the
++ * bootloader-provided simple-framebuffer. The Adreno 512 GPU still works
++ * headless via its render node. Add the panel + &mdss_dsi0 nodes here once a
++ * HX83112A panel driver lands.
++ */
 +
 +&mmss_smmu {
 +	status = "okay";
@@ -590,41 +543,6 @@ index 000000000..564b09c49
 +
 +&tlmm {
 +	gpio-reserved-ranges = <8 4>;
-+
-+	ts_pins_active: ts-pins-active-state {
-+		pins = "gpio66", "gpio67";
-+		function = "gpio";
-+		drive-strength = <16>;
-+		bias-pull-up;
-+	};
-+
-+	ts_rst_sleep: ts-rst-sleep-state {
-+		pins = "gpio66";
-+		function = "gpio";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
-+
-+	ts_int_sleep: ts-int-sleep-state {
-+		pins = "gpio67";
-+		function = "gpio";
-+		drive-strength = <2>;
-+		bias-disable;
-+	};
-+
-+	panel_reset_n: panel-rst-n-state {
-+		pins = "gpio53";
-+		function = "gpio";
-+		drive-strength = <8>;
-+		bias-disable;
-+	};
-+
-+	mdp_vsync_n: mdp-vsync-n-state {
-+		pins = "gpio59";
-+		function = "mdp_vsync";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
 +};
 +
 +&usb3 {
