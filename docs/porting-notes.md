@@ -94,6 +94,15 @@ To resume: add `static const struct himax_chip hx83112a_chip = { .id = 0x83112a,
 variant is bound before debugging the protocol.
 
 ## FIX: A/B boot-slot retry -> dropped to fastboot (2026-06-14)
-Symptom: after running a few hours (battery drained to empty) the device came back stuck in
-fastboot and would not boot pmOS. Cause: this is an A/B device; pmOS did not mark the slot
-"successful", so the bootloader decremented slot_as
+A/B device. pmOS did not mark the slot successful, so the bootloader decremented slot_a retry
+on each boot/power-cycle until it hit 0 -> slot unbootable -> dropped to fastboot (seen after the
+battery drained flat and the device power-cycled). Recovery: fastboot set_active a ; fastboot reboot.
+Permanent fix (baked in): added qbootctl to device-vsmart-zangyapro depends; its qbootctl.service
+runs qbootctl -m at boot to mark the slot successful. Verified Successful=1 on slot _a.
+
+## NOTE: charging works, but needs a strong charger (mainline pm660 charger)
+Charger-type detection works (BC1.2): laptop/weak port -> SDP, input capped ~450mA; a real fast
+wall charger -> DCP, input 1.5A. At 450mA the running load (CPU+WiFi+BT, ~0.5A) exceeds input so
+the battery NET-DISCHARGES even while "Charging" (this is why it died plugged into a weak port).
+On a 2A+ DCP charger: current_max=1.5A, battery current_now ~+1.15A = charges fine while running.
+Takeaway for the headless server: power it from a 2A+ wall charger, never a laptop/weak USB port.
