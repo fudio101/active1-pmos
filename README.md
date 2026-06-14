@@ -74,15 +74,11 @@ The port is two upstream contributions, in order:
    → dts) is **submitted** as
    **[sdm660-mainline/linux#185](https://github.com/sdm660-mainline/linux/pull/185)**
    (branch `fudio101/vsmart-active1` → base `qcom-sdm660-6.19.y`, the kernel actually tested on
-   the device). The panel **binding + driver** also target mainline `drm-misc` — a ready-to-send
-   2-patch series is staged under [`mainline-submission/`](mainline-submission) (the driver base is
-   byte-identical to mainline, so the patches apply on drm-misc-next; both are checkpatch-clean
-   under the current `Assisted-by`-aware checkpatch). The dts + `arm/qcom.yaml` board compatible go
-   to mainline `arm-soc` only after the binding/driver land there. The pmaports kernel package
-   builds from a release tarball, so the sdm660-mainline series must **merge and a new sdm660 tag be
-   cut** before the build stops needing `--src`; until then the build uses the local `~/linux-sdm660`
-   source. All patches pass `checkpatch`, `dt_binding_check` and `dtbs_check` clean (the one dts
-   `checkpatch` warning is the usual MAINTAINERS false-positive).
+   the device). This is the tree the pmaports kernel package builds from (a release tarball), so the
+   series must **merge and a new sdm660 tag be cut** before the build stops needing `--src`; until
+   then the build uses the local `~/linux-sdm660` source. All patches pass `checkpatch`,
+   `dt_binding_check` and `dtbs_check` clean (the one dts `checkpatch` warning is the usual
+   MAINTAINERS false-positive).
 2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr) (three commits to apply once the
    kernel tag lands). Blocked on (1): the device dtb and the panel driver only exist once the new
    tag ships them. The three changes:
