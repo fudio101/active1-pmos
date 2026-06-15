@@ -138,6 +138,12 @@ After the battery dies flat the FG loses its reference and the percentage sticks
 full charge cycle recalibrates it. A proper fix would require loading the device battery
 profile into the FG SRAM (mainline does not do this yet).
 
+### WiFi MAC address is randomised
+
+The WCN3990 has no MAC stored for mainline to read, so the WiFi interface gets a **random MAC on
+every boot**. WiFi itself works; if you rely on DHCP reservations, pin a fixed MAC (e.g. a
+NetworkManager `cloned-mac-address` setting or a systemd-networkd `.link` file).
+
 ### Touchscreen (Himax HX83112A) — Parked
 
 The touch IC is a Himax HX83112A on i2c-0 (`c175000.i2c`) at address **0x48** (irq gpio67,

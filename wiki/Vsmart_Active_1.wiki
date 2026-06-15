@@ -35,13 +35,13 @@
 
 | supported      = yes
 | prebuiltimages = no
-| initial_MR   = <!-- {{MR|CHANGE_ME|pmaports}} khi mở MR -->
+| initial_MR   = <!-- {{MR|CHANGE_ME|pmaports}} once the MR is opened -->
 
 <!-- Features: Main -->
 | status_flashing = Y
 | status_usbnet   = Y
 | status_emmc     = Y
-| status_sdcard   = <!-- enabled in DT, chưa có thẻ để test runtime -->
+| status_sdcard   = <!-- enabled in DT, no card on hand to test at runtime -->
 | status_battery  = P
 | status_screen   = Y
 | status_touch    = N
