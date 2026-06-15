@@ -72,13 +72,15 @@ The port is two upstream contributions, in order:
 
 1. **Kernel** — the 4-patch series in [`kernel/`](kernel) (panel binding → driver → board binding
    → dts) is **submitted** as
-   **[sdm660-mainline/linux#185](https://github.com/sdm660-mainline/linux/pull/185)**
-   (branch `fudio101/vsmart-active1` → base `qcom-sdm660-6.19.y`, the kernel actually tested on
-   the device). This is the tree the pmaports kernel package builds from (a release tarball), so the
-   series must **merge and a new sdm660 tag be cut** before the build stops needing `--src`; until
-   then the build uses the local `~/linux-sdm660` source. All patches pass `checkpatch`,
-   `dt_binding_check` and `dtbs_check` clean (the one dts `checkpatch` warning is the usual
-   MAINTAINERS false-positive).
+   **[sdm660-mainline/linux#186](https://github.com/sdm660-mainline/linux/pull/186)**
+   (branch `fudio101/vsmart-active1-7.0` → base `qcom-sdm660-7.0.y`, the current default branch —
+   the maintainer asked to retarget here since `6.19.y` is EOL; superseded #185). It was first
+   developed/tested on `v6.19.10-sdm660` and rebases cleanly onto 7.0.y (dts compiles, dtbs_check
+   clean). This is the tree the pmaports kernel package builds from (a release tarball); 7.0.y has
+   **no release tag yet**, so pmaports stays on `--src ~/linux-sdm660` until #186 merges **and a
+   `v7.0.x-sdm660` tag is cut**. All patches pass `checkpatch`, `dt_binding_check` and `dtbs_check`
+   clean on 7.0.y (the one dts `checkpatch` warning is the usual MAINTAINERS false-positive; the
+   `Assisted-by` tag is clean under 7.0.y's checkpatch).
 2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr) (three commits to apply once the
    kernel tag lands). Blocked on (1): the device dtb and the panel driver only exist once the new
    tag ships them. The three changes:

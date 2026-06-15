@@ -1,4 +1,4 @@
-From 9852b7465598d794a3b691214e2eb347aeb2fe32 Mon Sep 17 00:00:00 2001
+From 248c8ce947b4868008c8df66699df2ef4f1d13bf Mon Sep 17 00:00:00 2001
 From: Adrian Nguyen <thenguyen1024@gmail.com>
 Date: Sun, 14 Jun 2026 15:23:06 +0000
 Subject: [PATCH 2/4] drm/panel: himax-hx83112a: add Vsmart Active 1 DJN

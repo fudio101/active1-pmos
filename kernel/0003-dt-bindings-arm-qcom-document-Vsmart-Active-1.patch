@@ -1,4 +1,4 @@
-From 95420ed1ca9f3d53bb34453f917458a4b5102904 Mon Sep 17 00:00:00 2001
+From 69457105cc8c6df1f84808b11fdae3a215f8a38f Mon Sep 17 00:00:00 2001
 From: Adrian Nguyen <thenguyen1024@gmail.com>
 Date: Sun, 14 Jun 2026 15:23:06 +0000
 Subject: [PATCH 3/4] dt-bindings: arm: qcom: document Vsmart Active 1
@@ -13,10 +13,10 @@ Signed-off-by: Adrian Nguyen <thenguyen1024@gmail.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/arm/qcom.yaml b/Documentation/devicetree/bindings/arm/qcom.yaml
-index b18135ea9..1f878f66c 100644
+index 8eacbebe0..b419ddcea 100644
 --- a/Documentation/devicetree/bindings/arm/qcom.yaml
 +++ b/Documentation/devicetree/bindings/arm/qcom.yaml
-@@ -841,6 +841,7 @@ properties:
+@@ -854,6 +854,7 @@ properties:
                - xiaomi,platina
                - bbry,athena-boe
                - bbry,athena-syna

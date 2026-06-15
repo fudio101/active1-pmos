@@ -20,7 +20,9 @@ if [ -f "$HERE/dev.config" ]; then . "$HERE/dev.config"; fi
 # Defaults below are the original porter's values (user fudio101); change for your own setup.
 PMB="${PMB:-$HOME/pmbootstrap}"                  # pmbootstrap checkout
 KSRC="${KSRC:-$HOME/linux-sdm660}"               # kernel source (sdm660-mainline/linux)
-KTAG="${KTAG:-v6.19.10-sdm660}"
+# The PR targets the active qcom-sdm660-7.0.y branch (6.19 is EOL). 7.0.y has no
+# release tag yet, so clone the branch; switch KTAG to a v7.0.x-sdm660 tag once one is cut.
+KTAG="${KTAG:-qcom-sdm660-7.0.y}"
 KPKG="linux-postmarketos-qcom-sdm660"            # shared SoC kernel package
 DEVICE="vsmart-zangyapro"
 DTS="sdm660-vsmart-zangyapro.dts"

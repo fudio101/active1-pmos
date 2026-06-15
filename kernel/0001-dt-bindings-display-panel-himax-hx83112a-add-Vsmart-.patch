@@ -1,4 +1,4 @@
-From bc41d2d94fc0638b8b98f732fce555c9d734a051 Mon Sep 17 00:00:00 2001
+From 8c2d9df642e353fff1903e5e15a3395ab0d6cb73 Mon Sep 17 00:00:00 2001
 From: Adrian Nguyen <thenguyen1024@gmail.com>
 Date: Sun, 14 Jun 2026 15:23:05 +0000
 Subject: [PATCH 1/4] dt-bindings: display: panel: himax,hx83112a: add Vsmart
