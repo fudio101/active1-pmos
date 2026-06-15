@@ -27,7 +27,7 @@
 | Category | testing |
 | Pre-built images | no |
 | Mainline | yes (shared `linux-postmarketos-qcom-sdm660`) |
-| Kernel | 6.19.x |
+| Kernel | 7.0.x |
 
 The Vsmart Active 1 is a rebrand of the **BQ Aquaris X2 Pro** and is very close to the
 **Xiaomi Mi A2 (jasmine)**; the port is derived from the latter. It is used here as a
@@ -45,10 +45,11 @@ small **headless home server**.
 | Flashing | Works |
 | Booting (fastboot boot / flashed boot) | Works |
 | Internal storage (eMMC HS400) | Works |
+| microSD slot | Enabled (not yet runtime-tested — no card on hand) |
 | USB Networking | Works |
 | USB OTG | Untested |
 | Display (DRM DSI panel HX83112A DJN 1080×2160) | Works |
-| Touchscreen (Himax HX83112A) | WIP (see Known issues) |
+| Touchscreen (Himax HX83112A) | Parked (see Known issues) |
 | WiFi (WCN3990) | Works |
 | Bluetooth (WCN3990) | Works |
 | GPU (Adreno 512, freedreno FD512) | Works (glmark2 score 512, renders 3D on the panel) |
@@ -137,7 +138,7 @@ After the battery dies flat the FG loses its reference and the percentage sticks
 full charge cycle recalibrates it. A proper fix would require loading the device battery
 profile into the FG SRAM (mainline does not do this yet).
 
-### Touchscreen (Himax HX83112A) — WIP
+### Touchscreen (Himax HX83112A) — Parked
 
 The touch IC is a Himax HX83112A on i2c-0 (`c175000.i2c`) at address **0x48** (irq gpio67,
 reset gpio66) and reports product id **0x83112a**. The mainline `himax_hx83112b` driver only
