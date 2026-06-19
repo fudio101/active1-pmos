@@ -1,12 +1,12 @@
-# Maintainer: Adrian Nguyen <thenguyen1024@gmail.com>
+maintainer="Adrian Nguyen <thenguyen1024@gmail.com>"
 pkgname=firmware-vsmart-zangyapro
 pkgver=1
-pkgrel=1
+pkgrel=0
 pkgdesc="Vsmart Active 1 (zangyapro) firmware: WCN3990 WiFi + Adreno 512 zap"
 url="https://postmarketos.org"
 arch="aarch64"
 license="proprietary"
-options="!check !strip !archcheck !spdx !tracedeps"
+options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
 source="board-2.bin firmware-5.bin a512_zap.mbn"
 package() {
 	install -Dm644 "$srcdir"/board-2.bin   "$pkgdir"/lib/firmware/ath10k/WCN3990/hw1.0/board-2.bin

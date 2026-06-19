@@ -12,28 +12,26 @@ lives on **GitLab**, so this is a `glab` / GitLab merge request, not a `gh` PR.
 > 7.0 release. Until then the device builds locally via `./dev.sh build` (`--src ~/linux-sdm660`,
 > now on the 7.0.y branch).
 
-## The three changes (one commit each — follow pmaports `COMMITSTYLE.md`)
+## Two commits (per pmaports `COMMITSTYLE.md` — new device + firmware in same commit)
 
-### 1. `device/testing/linux-postmarketos-qcom-sdm660/` (shared SoC kernel)
-- Bump `pkgver` to the new 7.0 tag, e.g. `7.0.0`, so `_tag="v$pkgver-sdm660"` pulls the tarball
-  that now contains the new dts + panel driver. (`pkgrel` resets to `0` on a `pkgver` bump.) This
-  also moves pmaports off the EOL 6.19 kernel.
+### Commit 1: shared SoC kernel (gated on v7.0.x-sdm660 tag)
+Package: `device/testing/linux-postmarketos-qcom-sdm660/`
+- Bump `pkgver` to the new 7.0 tag (e.g. `7.0.0`); `_tag="v$pkgver-sdm660"` pulls the tarball
+  that ships the new dts + HX83112A panel driver. (`pkgrel` resets to `0` on a `pkgver` bump.)
+  This also moves pmaports off the EOL 6.19 kernel.
 - Enable the panel in `config-postmarketos-qcom-sdm660.aarch64` — see
   [`linux-config.diff`](linux-config.diff): `CONFIG_DRM_PANEL_HIMAX_HX83112A=m`.
 - `pmbootstrap kconfig check linux-postmarketos-qcom-sdm660`, then
   `pmbootstrap checksum linux-postmarketos-qcom-sdm660`.
-- Commit: `linux-postmarketos-qcom-sdm660: enable Himax HX83112A panel, bump to v7.0.x-sdm660`
+- **Commit message:** `linux-postmarketos-qcom-sdm660: enable Himax HX83112A panel, bump to v7.0.x-sdm660`
 
-### 2. `device/testing/device-vsmart-zangyapro/` (new device)
-- Copy from [`../pmaports/device/testing/device-vsmart-zangyapro/`](../pmaports/device/testing/device-vsmart-zangyapro).
-- Reset `pkgrel=0` for the initial upstream submission (local iteration left it at 5).
-- `modules-initfs` already lists `panel-himax-hx83112a` so the display comes up in the initramfs.
-- Commit: `device-vsmart-zangyapro: new device`
-
-### 3. `device/testing/firmware-vsmart-zangyapro/` (new firmware)
-- Copy from [`../pmaports/device/testing/firmware-vsmart-zangyapro/`](../pmaports/device/testing/firmware-vsmart-zangyapro).
-- Ships the device blobs: WCN3990 `board-2.bin` (WiFi) + Adreno 512 `a512_zap.mbn` (GPU zap).
-- Commit: `firmware-vsmart-zangyapro: new firmware`
+### Commit 2: new device + firmware (one commit per COMMITSTYLE)
+Packages: `device/testing/device-vsmart-zangyapro/` + `device/testing/firmware-vsmart-zangyapro/`
+- Copy device pkg from [`../pmaports/device/testing/device-vsmart-zangyapro/`](../pmaports/device/testing/device-vsmart-zangyapro) — reset `pkgrel=0`.
+- Copy firmware pkg from [`../pmaports/device/testing/firmware-vsmart-zangyapro/`](../pmaports/device/testing/firmware-vsmart-zangyapro) — `pkgrel=0`.
+  Ships: WCN3990 `board-2.bin` (WiFi) + Adreno 512 `a512_zap.mbn` (GPU zap) + `firmware-5.bin` (WCN3990 feature descriptor).
+- `modules-initfs` lists `panel-himax-hx83112a` so the display comes up in the initramfs.
+- **Commit message:** `vsmart-zangyapro: new device`
 
 ## Submit
 
@@ -41,11 +39,11 @@ lives on **GitLab**, so this is a `glab` / GitLab merge request, not a `gh` PR.
 glab auth login                                    # GitLab token (one-time)
 glab repo fork postmarketOS/pmaports --clone       # or clone your existing fork
 cd pmaports && git checkout -b vsmart-active1
-# apply the three changes above, commit each per COMMITSTYLE.md
+# apply commit 1 (kernel bump + panel config), then commit 2 (device + firmware together)
 pmbootstrap build device-vsmart-zangyapro          # sanity-build from the MR tree (needs the new tag)
 git push -u origin vsmart-active1
 glab mr create --source-branch vsmart-active1 --target-branch master \
-  --title "device-vsmart-zangyapro: new device" --fill
+  --title "vsmart-zangyapro: new device" --fill
 ```
 
 ## Notes
@@ -62,7 +60,7 @@ glab mr create --source-branch vsmart-active1 --target-branch master \
 [ ] pmbootstrap checksum linux-postmarketos-qcom-sdm660
 [ ] glab auth login (GitLab personal access token)
 [ ] Fork + clone postmarketOS/pmaports on GitLab (see Submit section above)
-[ ] Apply 3 commits, push branch vsmart-active1
-[ ] glab mr create --title "device-vsmart-zangyapro: new device" --fill
+[ ] Apply 2 commits (commit 1: kernel; commit 2: device+firmware together), push branch vsmart-active1
+[ ] glab mr create --title "vsmart-zangyapro: new device" --fill
 [x] Wiki published: https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)
 ```
