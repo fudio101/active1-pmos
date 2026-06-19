@@ -71,19 +71,17 @@ the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 
 The port is two upstream contributions, in order:
 
 1. **Kernel** — the 4-patch series in [`kernel/`](kernel) (panel binding → driver → board binding
-   → dts) is **submitted** as
+   → dts) **merged 2026-06-20** into `qcom-sdm660-7.0.y` as
    **[sdm660-mainline/linux#186](https://github.com/sdm660-mainline/linux/pull/186)**
-   (branch `fudio101/vsmart-active1-7.0` → base `qcom-sdm660-7.0.y`, the current default branch —
-   the maintainer asked to retarget here since `6.19.y` is EOL; superseded #185). It was first
-   developed/tested on `v6.19.10-sdm660` and rebases cleanly onto 7.0.y (dts compiles, dtbs_check
-   clean). This is the tree the pmaports kernel package builds from (a release tarball); 7.0.y has
-   **no release tag yet**, so pmaports stays on `--src ~/linux-sdm660` until #186 merges **and a
-   `v7.0.x-sdm660` tag is cut**. All patches pass `checkpatch`, `dt_binding_check` and `dtbs_check`
-   clean on 7.0.y (the one dts `checkpatch` warning is the usual MAINTAINERS false-positive; the
-   `Assisted-by` tag is clean under 7.0.y's checkpatch).
-2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr) (three commits to apply once the
-   kernel tag lands). Blocked on (1): the device dtb and the panel driver only exist once the new
-   tag ships them. The three changes:
+   (branch `fudio101/vsmart-active1-7.0`; superseded #185 on EOL 6.19.y). First
+   developed/tested on `v6.19.10-sdm660`; all patches pass `checkpatch`, `dt_binding_check` and
+   `dtbs_check` clean on 7.0.y (the one dts `checkpatch` warning is the usual MAINTAINERS
+   false-positive; `Assisted-by` tag clean under 7.0.y's checkpatch). The pmaports kernel package
+   builds from a release tarball; 7.0.y has **no release tag yet**, so pmaports stays on
+   `--src ~/linux-sdm660` until the **`v7.0.x-sdm660` tag is cut**.
+2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr). Blocked on the
+   **`v7.0.x-sdm660` tag** (device dtb + HX83112A panel driver only ship in that release
+   tarball). Three commits to apply once the tag lands:
    - `device/testing/linux-postmarketos-qcom-sdm660`: enable
      `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` and bump `_pkgver`/`_tag` to the new sdm660 tag.
    - `device/testing/device-vsmart-zangyapro/` — the device package
@@ -93,7 +91,7 @@ The port is two upstream contributions, in order:
 
    Copy these into a [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout
    and open a merge request following its `COMMITSTYLE.md` (GitLab — needs `glab`/GitLab auth,
-   not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for the exact steps.
+   not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for exact steps.
 3. **Wiki** — published at **[wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)](https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro))**. Source kept at [`wiki/Vsmart_Active_1.wiki`](wiki/Vsmart_Active_1.wiki).
 
 ## Environment notes

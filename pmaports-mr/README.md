@@ -3,14 +3,12 @@
 Step 2 of upstreaming (see [`../README.md`](../README.md#upstreaming--publishing)). pmaports
 lives on **GitLab**, so this is a `glab` / GitLab merge request, not a `gh` PR.
 
-> **Blocked on the kernel.** The kernel series is submitted as
-> [sdm660-mainline/linux#186](https://github.com/sdm660-mainline/linux/pull/186) (base
-> `qcom-sdm660-7.0.y`; #185 on 6.19.y was closed since that branch is EOL). This MR can only be
-> built/submitted once #186 **merges and a `v7.0.x-sdm660` tag is cut** that ships the device dts
-> **and** the HX83112A panel driver — the pmaports kernel package builds from a release tarball, not
-> from patches. **Note: 7.0.y has no tag yet**, so this is gated on the maintainer cutting the first
-> 7.0 release. Until then the device builds locally via `./dev.sh build` (`--src ~/linux-sdm660`,
-> now on the 7.0.y branch).
+> **[sdm660-mainline/linux#186](https://github.com/sdm660-mainline/linux/pull/186) merged
+> 2026-06-20** into `qcom-sdm660-7.0.y` (#185 on 6.19.y was closed — EOL). This MR is now
+> blocked **only on the maintainer cutting the first `v7.0.x-sdm660` release tag** (7.0.y still
+> has no tag) — that tarball ships the device dts **and** the HX83112A panel driver, which the
+> pmaports kernel package builds from. Until the tag lands, the device builds locally via
+> `./dev.sh build` (`--src ~/linux-sdm660`, on the 7.0.y branch).
 
 ## Two commits (per pmaports `COMMITSTYLE.md` — new device + firmware in same commit)
 
@@ -52,7 +50,7 @@ glab mr create --source-branch vsmart-active1 --target-branch master \
 - Keep the device in `device/testing/` until it has a second independent tester.
 - Touch is intentionally not included (parked — see `../docs/porting-notes.md`).
 
-## Checklist — When PR #186 Merges
+## Checklist — When the v7.0.x-sdm660 tag is cut
 
 ```
 [ ] Tag v7.0.x-sdm660 is cut

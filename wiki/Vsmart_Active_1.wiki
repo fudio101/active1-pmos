@@ -229,5 +229,5 @@ Fixed permanently by the <code>qbootctl</code> dependency.
 * [[Xiaomi Mi A2 (xiaomi-jasmine_sprout)]] — same SoC, shared kernel
 * [[Help:Device Page]]
 * [https://app.element.io/#/room/#sdm660-mainline:matrix.org Chat room: SDM660 devices development]
-* [https://github.com/sdm660-mainline/linux Kernel source (sdm660-mainline/linux)] — series retargeted to <code>qcom-sdm660-7.0.y</code> (PR #186)
+* [https://github.com/sdm660-mainline/linux Kernel source (sdm660-mainline/linux)] — series '''merged''' into <code>qcom-sdm660-7.0.y</code> ([https://github.com/sdm660-mainline/linux/pull/186 PR #186], 2026-06-20)
 * [https://github.com/fudio101/active1-pmos Port working tree (fudio101/active1-pmos)]
