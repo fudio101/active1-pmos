@@ -7,7 +7,7 @@
 # Repo layout mirrors upstream so files can be contributed directly:
 #   pmaports/device/testing/device-vsmart-zangyapro/   -> copy into pmaports MR
 #   kernel/sdm660-vsmart-zangyapro.dts (+ .patch)       -> kernel contribution
-#   wiki/Vsmart_Active_1.md                             -> postmarketOS wiki page
+#   wiki/Vsmart_Active_1.wiki                           -> postmarketOS wiki page (live: wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro))
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -60,6 +60,11 @@ cmd_sync(){    # push dts + device package into the live build trees
   local D="$APORTS/device/testing/device-$DEVICE"; mkdir -p "$D"
   cp -v "$DEVPKG_SRC"/* "$D/"
   pmb checksum "device-$DEVICE"
+  say "sync firmware package -> pmaports"
+  local FW_SRC="$HERE/pmaports/device/testing/firmware-$DEVICE"
+  local FW="$APORTS/device/testing/firmware-$DEVICE"; mkdir -p "$FW"
+  cp -v "$FW_SRC"/* "$FW/"
+  pmb checksum "firmware-$DEVICE"
   pmb config device "$DEVICE" >/dev/null; pmb config user "$SSH_USER" >/dev/null
   say "synced"
 }
@@ -74,7 +79,16 @@ cmd_patch(){   # regenerate kernel/*.patch from the committed dts in $KSRC
 }
 
 cmd_build(){   say "build kernel (--src $KSRC)"; pmb build "$KPKG" --src "$KSRC"; }
-cmd_install(){ say "install rootfs+boot (pass=$PASS)"; pmb install --password "$PASS"; }
+cmd_install(){
+  # Pre-build local packages so pmb install finds them cached and skips building.
+  # Without this, pmb install builds them mid-flow, strict-mode zaps chroot_native,
+  # then the rootfs mkdir step fails because chroot_native is gone.
+  say "pre-build local packages (device + firmware)"
+  pmb build "device-$DEVICE"
+  pmb build "firmware-$DEVICE"
+  say "install rootfs+boot (pass=$PASS)"
+  pmb install --password "$PASS"
+}
 cmd_export(){  say "export -> $EXPORT_DIR"; pmb export "$EXPORT_DIR"; ls -la "$EXPORT_DIR"; }
 cmd_all(){     cmd_sync; cmd_build; cmd_install; cmd_export; echo; say "next: put phone in fastboot, then ./dev.sh flash"; }
 

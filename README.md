@@ -31,7 +31,7 @@ kernel/
   sdm660-vsmart-zangyapro.dts                       # device tree (edit here)
   sdm660-xiaomi-jasmine.dts                         # upstream template (reference)
   *.patch                                           # kernel patch for upstreaming
-wiki/Vsmart_Active_1.md                             # postmarketOS wiki page draft
+wiki/Vsmart_Active_1.wiki                            # source for the live wiki page
 docs/hardware.md  docs/porting-notes.md
 build-output/                                       # boot image + build logs (gitignored)
 scripts/                                            # one-off scripts used during bring-up
@@ -94,7 +94,7 @@ The port is two upstream contributions, in order:
    Copy these into a [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout
    and open a merge request following its `COMMITSTYLE.md` (GitLab — needs `glab`/GitLab auth,
    not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for the exact steps.
-3. **Wiki** — publish `wiki/Vsmart_Active_1.md`.
+3. **Wiki** — published at **[wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)](https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro))**. Source kept at [`wiki/Vsmart_Active_1.wiki`](wiki/Vsmart_Active_1.wiki).
 
 ## Environment notes
 

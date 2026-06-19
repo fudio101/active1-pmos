@@ -22,6 +22,7 @@
 | storage = 64 GB
 | memory  = 4 GB
 | architecture = aarch64
+| wp_type =
 
 <!-- Software -->
 | originalsoftware = Android
@@ -29,8 +30,11 @@
 | status_fossbootloader = N
 
 <!-- postmarketOS -->
-| type        = handset
-| pmoskernel  = Mainline 7.0
+| type          = handset
+| pmoskernel    = Mainline 7.0.x
+| whet_dhry     = 0.0
+| devicepackage   = <!-- {{Device package|vsmart-zangyapro|testing}} once packaged -->
+| kernelpackage   = <!-- {{Kernel package|linux-postmarketos-qcom-sdm660}} once packaged -->
 | firmwarepackage = {{Firmware package|vsmart-zangyapro|testing}}
 
 | supported      = yes
@@ -46,11 +50,16 @@
 | status_screen   = Y
 | status_touch    = N
 | status_keyboard = -
+| status_touchpad = -
+| status_stylus   = -
 
 <!-- Features: Multimedia -->
 | status_3d     = Y
 | status_audio  =
 | status_camera =
+| status_cameraflash = -
+| status_irtx   = -
+| status_irrx   = -
 
 <!-- Features: Connectivity -->
 | status_wifi      = Y
@@ -64,14 +73,23 @@
 | status_mobiledata =
 
 <!-- Features: Misc -->
+| status_ethernet = -
+| status_usba = -
+| status_sata = -
 | status_otg  =
+| status_hdmidp = -
 | status_fde  =
 | status_fingerprint =
 
 <!-- Features: Sensors -->
-| status_haptics =
-| status_accel   =
+| status_accel     =
+| status_magnet    =
+| status_light     =
 | status_proximity =
+| status_hall      = -
+| status_haptics   =
+| status_barometer = -
+| status_powersensor =
 }}{{Based on SoC|Qualcomm_Snapdragon_660_(SDM660)|Snapdragon 660}}
 
 The '''Vsmart Active 1''' (codename '''vsmart-zangyapro''') is a 2018 Snapdragon 660 handset. It is a

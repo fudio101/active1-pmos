@@ -51,3 +51,18 @@ glab mr create --source-branch vsmart-active1 --target-branch master \
 ## Notes
 - Keep the device in `device/testing/` until it has a second independent tester.
 - Touch is intentionally not included (parked — see `../docs/porting-notes.md`).
+
+## Checklist — When PR #186 Merges
+
+```
+[ ] Tag v7.0.x-sdm660 is cut
+[ ] Pull latest pmaports checkout
+[ ] pmaports-mr commit 1: update _tag + enable panel config (see Section 1 above)
+[ ] pmbootstrap kconfig check linux-postmarketos-qcom-sdm660
+[ ] pmbootstrap checksum linux-postmarketos-qcom-sdm660
+[ ] glab auth login (GitLab personal access token)
+[ ] Fork + clone postmarketOS/pmaports on GitLab (see Submit section above)
+[ ] Apply 3 commits, push branch vsmart-active1
+[ ] glab mr create --title "device-vsmart-zangyapro: new device" --fill
+[x] Wiki published: https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)
+```

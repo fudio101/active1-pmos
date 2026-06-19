@@ -1,7 +1,7 @@
 # Porting notes / status
 
 Technical bring-up record for the Vsmart Active 1 (vsmart-zangyapro) pmOS port. The user-facing
-summary lives in [`../wiki/Vsmart_Active_1.md`](../wiki/Vsmart_Active_1.md) and
+summary lives in the [postmarketOS wiki](https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)) (source: [`../wiki/Vsmart_Active_1.wiki`](../wiki/Vsmart_Active_1.wiki)) and
 [`../README.md`](../README.md); this file keeps the deeper findings and the resume instructions
 for the open items.
 
