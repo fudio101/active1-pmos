@@ -29,7 +29,9 @@ Package: `device/testing/linux-postmarketos-qcom-sdm660/`
 Packages: `device/testing/device-vsmart-zangyapro/` + `device/testing/firmware-vsmart-zangyapro/`
 - Copy device pkg from [`../pmaports/device/testing/device-vsmart-zangyapro/`](../pmaports/device/testing/device-vsmart-zangyapro) — reset `pkgrel=0`.
 - Copy firmware pkg from [`../pmaports/device/testing/firmware-vsmart-zangyapro/`](../pmaports/device/testing/firmware-vsmart-zangyapro) — `pkgrel=0`.
-  Ships: WCN3990 `board-2.bin` (WiFi) + Adreno 512 `a512_zap.mbn` (GPU zap) + `firmware-5.bin` (WCN3990 feature descriptor).
+  Ships: WCN3990 `board-2.bin` (WiFi, committed blob — not found in any upstream source) +
+  Adreno 512 `a512_zap.mbn` (fetched from TheMuppets wayne-common, pinned commit `785f4c95`) +
+  `firmware-5.bin` (WCN3990 feature descriptor, committed).
 - `modules-initfs` lists `panel-himax-hx83112a` so the display comes up in the initramfs.
 - **Commit message:** `vsmart-zangyapro: new device`
 
