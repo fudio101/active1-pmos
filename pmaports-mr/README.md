@@ -27,9 +27,16 @@ Package: `device/testing/linux-postmarketos-qcom-sdm660/`
 Packages: `device/testing/device-vsmart-zangyapro/` + `device/testing/firmware-vsmart-zangyapro/`
 - Copy device pkg from [`../pmaports/device/testing/device-vsmart-zangyapro/`](../pmaports/device/testing/device-vsmart-zangyapro) — reset `pkgrel=0`.
 - Copy firmware pkg from [`../pmaports/device/testing/firmware-vsmart-zangyapro/`](../pmaports/device/testing/firmware-vsmart-zangyapro) — `pkgrel=0`.
-  Ships: WCN3990 `board-2.bin` (WiFi, committed blob — not found in any upstream source) +
-  Adreno 512 `a512_zap.mbn` (fetched from TheMuppets wayne-common, pinned commit `785f4c95`) +
-  `firmware-5.bin` (WCN3990 feature descriptor, committed).
+  Ships:
+  - `board-2.bin` (WCN3990 RF-calibration, 480 KB, 25-entry vendor table) — **NOT committed in
+    pmaports**. Self-hosted in `vendor-blobs/` at repo root (outside MR scope); APKBUILD fetches
+    it via `https://raw.githubusercontent.com/fudio101/active1-pmos/main/vendor-blobs/board-2.bin`.
+    Cannot use linux-firmware's copy — that file is for sdm845 and causes MSS watchdog crash on
+    SDM660 (pmaports #3803). See `vendor-blobs/README.md` for provenance + update instructions.
+  - `a512_zap.mbn` (Adreno 512 GPU zap shader) — fetched from TheMuppets
+    `proprietary_vendor_xiaomi_wayne-common` (pinned commit `785f4c95`).
+  - `firmware-5.bin` (WCN3990 feature descriptor) — **generated at build** by `ath10k-fwencoder`,
+    not a blob. Identical invocation to whyred/tulip/etc.
 - `modules-initfs` lists `panel-himax-hx83112a` so the display comes up in the initramfs.
 - **Commit message:** `vsmart-zangyapro: new device`
 

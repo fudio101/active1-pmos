@@ -27,6 +27,11 @@ earlier hangs were a low-power brownout). Known issue: the touchscreen is parked
 dev.sh                                              # build/flash/ssh helper
 pmaports/device/testing/device-vsmart-zangyapro/   # device package -> copy into pmaports
   APKBUILD  deviceinfo  modules-initfs
+pmaports/device/testing/firmware-vsmart-zangyapro/
+  APKBUILD                                          # firmware pkg (board-2.bin fetched from vendor-blobs/)
+vendor-blobs/                                       # proprietary blobs with no public mirror
+  board-2.bin                                       # WCN3990 RF-calibration (self-hosted, see README inside)
+  README.md                                         # provenance + update instructions for all blobs
 kernel/
   sdm660-vsmart-zangyapro.dts                       # device tree (edit here)
   sdm660-xiaomi-jasmine.dts                         # upstream template (reference)
@@ -86,8 +91,10 @@ The port is two upstream contributions, in order:
      `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` and bump `_pkgver`/`_tag` to the new sdm660 tag.
    - `device/testing/device-vsmart-zangyapro/` — the device package
      (mirrored at `pmaports/device/testing/device-vsmart-zangyapro/`).
-   - `device/testing/firmware-vsmart-zangyapro/` — device firmware blobs (WCN3990 `board-2.bin`,
-     Adreno 512 `a512_zap.mbn`).
+   - `device/testing/firmware-vsmart-zangyapro/` — device firmware pkg. `board-2.bin` (WCN3990
+     RF-calibration) is self-hosted in `vendor-blobs/` (excluded from the MR) and fetched via
+     raw GitHub URL; `a512_zap.mbn` (Adreno 512 zap) fetched from TheMuppets; `firmware-5.bin`
+     (WCN3990 feature descriptor) generated at build by `ath10k-fwencoder` — not a blob.
 
    Copy these into a [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout
    and open a merge request following its `COMMITSTYLE.md` (GitLab — needs `glab`/GitLab auth,
