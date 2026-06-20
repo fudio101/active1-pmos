@@ -1,29 +1,49 @@
 maintainer="Adrian Nguyen <thenguyen1024@gmail.com>"
 pkgname=firmware-vsmart-zangyapro
 pkgver=1
-pkgrel=3
+pkgrel=4
 pkgdesc="Vsmart Active 1 (zangyapro) firmware: WCN3990 WiFi + Adreno 512 zap"
 url="https://postmarketos.org"
 arch="aarch64"
 license="proprietary"
-# linux-firmware-ath10k provides wlanmdsp.mbn + firmware-5.bin.zst for WCN3990.
-# Its board-2.bin.zst (newer, 867 KB decompressed) causes MSS watchdog crashes on
-# SDM660 (pmaports issue #3803). We install our own uncompressed board-2.bin (480 KB,
-# not from linux-firmware); kernel loader prefers exact .bin over .bin.zst.
 depends="linux-firmware-ath10k"
 options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
 makedepends="qca-swiss-army-knife"
 builddir="$srcdir"
-# board-2.bin: WCN3990 board-data container verified to work on SDM660/zangyapro.
-# a512_zap.mbn: ELF-format GPU zap shader (byte-identical to a512_zap.elf in
-# wayne-common; kernel loads either format). Pinned to commit 785f4c95.
-_fw_commit="6ea2567e38d11524cb51f0b5ead64083a3ad12d5"
-source="board-2.bin::https://raw.githubusercontent.com/fudio101/active1-pmos/$_fw_commit/pmaports/device/testing/firmware-vsmart-zangyapro/board-2.bin
-	a512_zap.mbn::https://raw.githubusercontent.com/TheMuppets/proprietary_vendor_xiaomi_wayne-common/785f4c95ad84bd1daa747bd71211fdd419c0af01/proprietary/vendor/firmware/a512_zap.elf
+
+# board-2.bin — WCN3990 ath10k RF-calibration container (proprietary, unbuildable).
+#   ORIGIN: Vsmart Active 1 stock /vendor/firmware/wlan/; self-hosted in this repo's
+#           vendor-blobs/ (see vendor-blobs/README.md). NOT from linux-firmware — that
+#           copy is for Pixel/Dragonboard/Lenovo (sdm845) and crashes SDM660 with a
+#           MSS watchdog fault (pmaports #3803). Our 480 KB file (25-entry qmi-board-id
+#           table, bus=snoc) is the device's genuine Qualcomm RF calibration.
+#           Device loads entry qmi-board-id=ff (dmesg: board_id 0xff, chip_id 0x140).
+#           Inspect entries: ath10k-bdencoder -i board-2.bin (qca-swiss-army-knife).
+#   UPDATE: extract from a stock Active 1 ROM vendor partition; replace the file in
+#           vendor-blobs/, refresh sha512 here.
+#   NOTE:   linux-firmware-ath10k (depends=) still provides wlanmdsp.mbn (WLAN DSP)
+#           and firmware-5.bin.zst. Our uncompressed board-2.bin takes priority over
+#           the .zst because the kernel firmware loader prefers exact .bin over .bin.zst
+#           (CONFIG_FW_LOADER_COMPRESS_ZSTD=y does not reverse this order).
+
+# a512_zap.mbn — Adreno 512 GPU zap shader (proprietary, unbuildable).
+#   ORIGIN: TheMuppets proprietary_vendor_xiaomi_wayne-common (SDM660 Xiaomi devices);
+#           file a512_zap.elf (kernel loads .elf and .mbn interchangeably).
+#           Content is identical across all SDM660 Xiaomi vendor images.
+#   UPDATE: bump _zap_commit to a newer wayne-common commit, refresh sha512.
+
+# firmware-5.bin — ath10k WMI/HTT feature descriptor. NOT a blob; generated in
+#   build() by ath10k-fwencoder with exact feature flags for WCN3990 on SDM660.
+#   Identical invocation used by other SDM660 devices (whyred, tulip, etc.).
+
+# wlanmdsp.mbn — WCN3990 WLAN DSP firmware, loaded by remoteproc.
+#   Provided by linux-firmware-ath10k (depends=); not packaged here.
+
+_zap_commit="785f4c95ad84bd1daa747bd71211fdd419c0af01"
+source="board-2.bin::https://raw.githubusercontent.com/fudio101/active1-pmos/main/vendor-blobs/board-2.bin
+	a512_zap.mbn::https://raw.githubusercontent.com/TheMuppets/proprietary_vendor_xiaomi_wayne-common/$_zap_commit/proprietary/vendor/firmware/a512_zap.elf
 "
 build() {
-	# Generate ath10k WCN3990 feature-descriptor (not a proprietary blob).
-	# Identical invocation used by other SDM660 WCN3990 devices (whyred, tulip, etc.).
 	ath10k-fwencoder --create \
 		--features=wowlan,no-nwifi-decap-4addr-padding,allows-mesh-bcast,mgmt-tx-by-ref,non-bmi,single-chan-info-per-channel \
 		--set-wmi-op-version=tlv --set-htt-op-version=tlv \
