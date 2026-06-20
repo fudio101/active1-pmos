@@ -11,10 +11,11 @@ options="!check !archcheck"
 # NetworkManager (+WiFi backend), wpa_supplicant and openssh are pulled in by
 # the chosen UI (postmarketos-ui-console -> postmarketos-base-ui-networkmanager)
 # and postmarketos-base, so they are NOT listed here. Only device-specific bits
-# stay: the firmware (board-2.bin for WiFi + a512_zap.mbn for the GPU, both in
-# firmware-vsmart-zangyapro; a530 microcode in firmware-qcom-adreno-a530), the
-# kernel, the SoC glue, and bluez (base-ui only integrates BT *if* bluez is
-# present, so keep it to guarantee the auto-start symlink below works).
+# stay: the firmware (WCN3990 WiFi board-2.bin+firmware-5.bin via
+# linux-firmware-ath10k; a512_zap.mbn for the GPU in firmware-vsmart-zangyapro;
+# a530 microcode in firmware-qcom-adreno-a530), the kernel, the SoC glue, and
+# bluez (base-ui only integrates BT *if* bluez is present, so keep it to
+# guarantee the auto-start symlink below works).
 depends="
 	bluez
 	firmware-qcom-adreno-a530
@@ -42,9 +43,9 @@ package() {
 	devicepkg_package $startdir $pkgname
 
 	# Auto-start Bluetooth at boot (for a BT keyboard on a headless box)
-	# and make sure WiFi (NetworkManager) and SSH come up too. The firmware
-	# (board-2.bin for WiFi, a512_zap.mbn for the GPU) ships in
-	# firmware-vsmart-zangyapro, which is a hard dependency above.
+	# and make sure WiFi (NetworkManager) and SSH come up too. WiFi firmware
+	# (WCN3990 board-2.bin + firmware-5.bin) comes via linux-firmware-ath10k
+	# (a dependency of firmware-vsmart-zangyapro above).
 	install -dm755 "$pkgdir"/etc/systemd/system/multi-user.target.wants
 	ln -sf /usr/lib/systemd/system/bluetooth.service \
 		"$pkgdir"/etc/systemd/system/multi-user.target.wants/bluetooth.service
