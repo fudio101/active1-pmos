@@ -1,21 +1,25 @@
 maintainer="Adrian Nguyen <thenguyen1024@gmail.com>"
 pkgname=firmware-vsmart-zangyapro
 pkgver=1
-pkgrel=2
+pkgrel=3
 pkgdesc="Vsmart Active 1 (zangyapro) firmware: WCN3990 WiFi + Adreno 512 zap"
 url="https://postmarketos.org"
 arch="aarch64"
 license="proprietary"
-# WCN3990 board-2.bin comes from linux-firmware-ath10k (compressed .zst;
-# kernel loads via CONFIG_FW_LOADER_COMPRESS_ZSTD). firmware-5.bin is
-# generated here to guarantee exact feature flags for SDM660/WCN3990.
+# linux-firmware-ath10k provides wlanmdsp.mbn + firmware-5.bin.zst for WCN3990.
+# Its board-2.bin.zst (newer, 867 KB decompressed) causes MSS watchdog crashes on
+# SDM660 (pmaports issue #3803). We install our own uncompressed board-2.bin (480 KB,
+# not from linux-firmware); kernel loader prefers exact .bin over .bin.zst.
 depends="linux-firmware-ath10k"
 options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
 makedepends="qca-swiss-army-knife"
 builddir="$srcdir"
-# a512_zap.mbn is the ELF-format GPU zap shader (byte-identical to a512_zap.elf in
+# board-2.bin: WCN3990 board-data container verified to work on SDM660/zangyapro.
+# a512_zap.mbn: ELF-format GPU zap shader (byte-identical to a512_zap.elf in
 # wayne-common; kernel loads either format). Pinned to commit 785f4c95.
-source="a512_zap.mbn::https://raw.githubusercontent.com/TheMuppets/proprietary_vendor_xiaomi_wayne-common/785f4c95ad84bd1daa747bd71211fdd419c0af01/proprietary/vendor/firmware/a512_zap.elf
+_fw_commit="6ea2567e38d11524cb51f0b5ead64083a3ad12d5"
+source="board-2.bin::https://raw.githubusercontent.com/fudio101/active1-pmos/$_fw_commit/pmaports/device/testing/firmware-vsmart-zangyapro/board-2.bin
+	a512_zap.mbn::https://raw.githubusercontent.com/TheMuppets/proprietary_vendor_xiaomi_wayne-common/785f4c95ad84bd1daa747bd71211fdd419c0af01/proprietary/vendor/firmware/a512_zap.elf
 "
 build() {
 	# Generate ath10k WCN3990 feature-descriptor (not a proprietary blob).
@@ -26,9 +30,11 @@ build() {
 		--set-fw-api=5
 }
 package() {
+	install -Dm644 "$srcdir"/board-2.bin    "$pkgdir"/lib/firmware/ath10k/WCN3990/hw1.0/board-2.bin
 	install -Dm644 "$srcdir"/firmware-5.bin "$pkgdir"/lib/firmware/ath10k/WCN3990/hw1.0/firmware-5.bin
 	install -Dm644 "$srcdir"/a512_zap.mbn   "$pkgdir"/lib/firmware/postmarketos/a512_zap.mbn
 }
 sha512sums="
+424d328ebc8cf56d2112f687ab4f175cdf97cb8eac37e9390b6aeee87c022c6b97b7ad29cb2a1b955a781df02a88cff900cd1495bbcda9029af86754289fefe4  board-2.bin
 ab852686fcba7eac9974bb83693630d312617512f731f84e17c8422bb83e08ac81e2c1f66333352aa512d6d67b464a88a551325639e45cf2b58fcf1b74436ede  a512_zap.mbn
 "
