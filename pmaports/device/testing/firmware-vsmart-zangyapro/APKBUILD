@@ -1,7 +1,7 @@
 maintainer="Adrian Nguyen <thenguyen1024@gmail.com>"
 pkgname=firmware-vsmart-zangyapro
 pkgver=1
-pkgrel=4
+pkgrel=0
 pkgdesc="Vsmart Active 1 (zangyapro) firmware: WCN3990 WiFi + Adreno 512 zap"
 url="https://postmarketos.org"
 arch="aarch64"
@@ -20,7 +20,9 @@ builddir="$srcdir"
 #           Device loads entry qmi-board-id=ff (dmesg: board_id 0xff, chip_id 0x140).
 #           Inspect entries: ath10k-bdencoder -i board-2.bin (qca-swiss-army-knife).
 #   UPDATE: extract from a stock Active 1 ROM vendor partition; replace the file in
-#           vendor-blobs/, refresh sha512 here.
+#           vendor-blobs/, then bump _board_commit to the commit that added it and
+#           refresh sha512 here. The URL is pinned to a commit (not a branch) so the
+#           source stays immutable, same as _zap_commit below.
 #   NOTE:   linux-firmware-ath10k (depends=) still provides wlanmdsp.mbn (WLAN DSP)
 #           and firmware-5.bin.zst. Our uncompressed board-2.bin takes priority over
 #           the .zst because the kernel firmware loader prefers exact .bin over .bin.zst
@@ -39,8 +41,9 @@ builddir="$srcdir"
 # wlanmdsp.mbn — WCN3990 WLAN DSP firmware, loaded by remoteproc.
 #   Provided by linux-firmware-ath10k (depends=); not packaged here.
 
+_board_commit="375b7d164793c32fe52f97a7ae3f8ef342563470"
 _zap_commit="785f4c95ad84bd1daa747bd71211fdd419c0af01"
-source="board-2.bin::https://raw.githubusercontent.com/fudio101/active1-pmos/main/vendor-blobs/board-2.bin
+source="board-2.bin::https://raw.githubusercontent.com/fudio101/active1-pmos/$_board_commit/vendor-blobs/board-2.bin
 	a512_zap.mbn::https://raw.githubusercontent.com/TheMuppets/proprietary_vendor_xiaomi_wayne-common/$_zap_commit/proprietary/vendor/firmware/a512_zap.elf
 "
 build() {

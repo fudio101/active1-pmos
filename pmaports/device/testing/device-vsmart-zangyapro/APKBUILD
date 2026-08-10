@@ -2,7 +2,7 @@
 maintainer="Adrian Nguyen <thenguyen1024@gmail.com>"
 pkgname=device-vsmart-zangyapro
 pkgdesc="Vsmart Active 1"
-pkgver=3
+pkgver=1
 pkgrel=0
 url="https://postmarketos.org"
 license="MIT"
@@ -27,8 +27,7 @@ depends="
 	qbootctl
 	soc-qcom-sdm660
 	soc-qcom-sdm660-rproc
-
-"
+	"
 makedepends="devicepkg-dev"
 source="
 	deviceinfo
@@ -53,5 +52,5 @@ package() {
 
 sha512sums="
 0740454a150a9c4ca6192108f1b2865faf6c70a4b90fce763e3741b3fca697df7874e98c6977fdf62f1af090f590dc05a4c85643fe9c1a653658f5692f114c2a  deviceinfo
-6dac4060da38e5bc2c8cec502b8c8638a0afd1f19f13527780bbc76b07f69ed6cb5e310a7d2e3568f6987991348afde0ed70771786e4a129c0ae0df86fe8d2bd  modules-initfs
+ac22d4ca340c1e20b6e59319d9d99ee180119179942d0c86138c671cc0912501688d0a79522aec8fbb9618fdbbc78470e1280429df9247d6ac43718c611e0025  modules-initfs
 "

@@ -5,8 +5,16 @@ Holds proprietary firmware blobs used by the Vsmart Active 1 (zangyapro) that:
 - have no usable public mirror (either absent from linux-firmware or present but incompatible).
 
 This directory lives at **repo root** (not under `pmaports/`) so it is automatically excluded from
-the upstream pmaports MR while its GitHub `main`-branch raw URLs remain publicly fetchable by the
-APKBUILD.
+the upstream pmaports MR while its GitHub raw URLs remain publicly fetchable by the APKBUILD.
+
+> **The APKBUILD pins the raw URL to a commit SHA, never a branch.** `firmware-vsmart-zangyapro`
+> fetches `board-2.bin` via `_board_commit` (same pattern as `_zap_commit` for the TheMuppets
+> blob), so the source is immutable — a requirement for reproducible builds, and what pmaports
+> reviewers expect. When you replace a blob here, bump `_board_commit` to the commit that added it
+> and refresh the sha512.
+>
+> Note this repo's default branch is **`master`**, not `main` — a `.../active1-pmos/main/...`
+> raw URL returns 404.
 
 ---
 
@@ -39,8 +47,13 @@ ath10k-bdencoder -e board-2.bin -o extracted.json
 **How to update:** Obtain a stock Active 1 ROM dump (firmware OTA zip or raw `vendor.img`). Mount
 the vendor partition, locate `firmware/wlan/board-2.bin` (or `board-2.bin` directly). Verify the
 new file is a valid `QCA-ATH10K-BOARD` container with a `bus=snoc` table. Replace this file,
-recompute sha512, update `sha512sums` in
-`pmaports/device/testing/firmware-vsmart-zangyapro/APKBUILD`.
+commit and push it, then in `pmaports/device/testing/firmware-vsmart-zangyapro/APKBUILD` set
+`_board_commit` to the SHA of that commit and refresh `sha512sums`. Verify the pinned URL resolves
+before submitting:
+
+```sh
+curl -sI "https://raw.githubusercontent.com/fudio101/active1-pmos/$_board_commit/vendor-blobs/board-2.bin"
+```
 
 ---
 
