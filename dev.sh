@@ -20,9 +20,10 @@ if [ -f "$HERE/dev.config" ]; then . "$HERE/dev.config"; fi
 # Defaults below are the original porter's values (user fudio101); change for your own setup.
 PMB="${PMB:-$HOME/pmbootstrap}"                  # pmbootstrap checkout
 KSRC="${KSRC:-$HOME/linux-sdm660}"               # kernel source (sdm660-mainline/linux)
-# The PR targets the active qcom-sdm660-7.0.y branch (6.19 is EOL). 7.0.y has no
-# release tag yet, so clone the branch; switch KTAG to a v7.0.x-sdm660 tag once one is cut.
-KTAG="${KTAG:-qcom-sdm660-7.0.y}"
+# Our 4 patches are merged into qcom-sdm660-7.0.y and shipped in tag v7.0.14-sdm660
+# (cut 2026-08-02), which pmaports packages as of upstream commit 263089a0. Pin the tag
+# for reproducible clones; set KTAG=qcom-sdm660-7.0.y to track the branch instead.
+KTAG="${KTAG:-v7.0.14-sdm660}"
 KPKG="linux-postmarketos-qcom-sdm660"            # shared SoC kernel package
 DEVICE="vsmart-zangyapro"
 DTS="sdm660-vsmart-zangyapro.dts"
@@ -78,7 +79,19 @@ cmd_patch(){   # regenerate kernel/*.patch from the committed dts in $KSRC
   ls -la "$HERE/kernel/"*.patch
 }
 
-cmd_build(){   say "build kernel (--src $KSRC)"; pmb build "$KPKG" --src "$KSRC"; }
+cmd_build(){
+  # Default: build from the local kernel checkout for fast iteration on patches.
+  # FROM_TARBALL=1: build from the release tarball named in the APKBUILD instead. That is
+  # what pmaports CI does, and the only way to validate an MR for real -- --src bypasses
+  # both the sha512 verification and the actual packaged sources.
+  if [ -n "${FROM_TARBALL:-}" ]; then
+    say "build kernel (from APKBUILD tarball, as pmaports CI does)"
+    pmb build "$KPKG" --arch aarch64 --force
+  else
+    say "build kernel (--src $KSRC)"
+    pmb build "$KPKG" --src "$KSRC"
+  fi
+}
 cmd_install(){
   # Pre-build local packages so pmb install finds them cached and skips building.
   # Without this, pmb install builds them mid-flow, strict-mode zaps chroot_native,

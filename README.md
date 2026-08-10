@@ -65,7 +65,7 @@ own there.
 To point the `./dev.sh` helpers at your own values without editing the tracked script, copy
 [`dev.config.example`](dev.config.example) to `dev.config` (gitignored) and set `SSH_USER`,
 `PASS`, `PHONE_IP`, `FASTBOOT`, etc. (or just export them as env vars). Other defaults live at
-the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 6.19.x.
+the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 7.0.x.
 
 > The `maintainer=` field in the APKBUILDs is package metadata (who maintains the package
 > upstream) and stays `fudio101` — you do not change it just by building, only if you take over
@@ -73,7 +73,7 @@ the top of `dev.sh`: device `vsmart-zangyapro`, console UI, SSH enabled, kernel 
 
 ## Upstreaming / publishing
 
-The port is two upstream contributions, in order:
+The port is three upstream contributions, in order:
 
 1. **Kernel** — the 4-patch series in [`kernel/`](kernel) (panel binding → driver → board binding
    → dts) **merged 2026-06-20** into `qcom-sdm660-7.0.y` as
@@ -81,25 +81,49 @@ The port is two upstream contributions, in order:
    (branch `fudio101/vsmart-active1-7.0`; superseded #185 on EOL 6.19.y). First
    developed/tested on `v6.19.10-sdm660`; all patches pass `checkpatch`, `dt_binding_check` and
    `dtbs_check` clean on 7.0.y (the one dts `checkpatch` warning is the usual MAINTAINERS
-   false-positive; `Assisted-by` tag clean under 7.0.y's checkpatch). The pmaports kernel package
-   builds from a release tarball; 7.0.y has **no release tag yet**, so pmaports stays on
-   `--src ~/linux-sdm660` until the **`v7.0.x-sdm660` tag is cut**.
-2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr). Blocked on the
-   **`v7.0.x-sdm660` tag** (device dtb + HX83112A panel driver only ship in that release
-   tarball). Three commits to apply once the tag lands:
+   false-positive; `Assisted-by` tag clean under 7.0.y's checkpatch). Shipped in release tag
+   **`v7.0.14-sdm660`** (cut 2026-08-02).
+2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr). **Unblocked.** The kernel package
+   maintainer bumped pmaports to 7.0.14 himself in
+   [!9224](https://gitlab.postmarketos.org/postmarketOS/pmaports/-/merge_requests/9224) (commit
+   `263089a0`, 2026-08-06), citing this device — so the dtb and the HX83112A driver already ship
+   in the packaged kernel. Two commits remain:
    - `device/testing/linux-postmarketos-qcom-sdm660`: enable
-     `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` and bump `_pkgver`/`_tag` to the new sdm660 tag.
-   - `device/testing/device-vsmart-zangyapro/` — the device package
-     (mirrored at `pmaports/device/testing/device-vsmart-zangyapro/`).
-   - `device/testing/firmware-vsmart-zangyapro/` — device firmware pkg. `board-2.bin` (WCN3990
-     RF-calibration) is self-hosted in `vendor-blobs/` (excluded from the MR) and fetched via
-     raw GitHub URL; `a512_zap.mbn` (Adreno 512 zap) fetched from TheMuppets; `firmware-5.bin`
-     (WCN3990 feature descriptor) generated at build by `ath10k-fwencoder` — not a blob.
+     `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` and bump `pkgrel`. **Do not touch `pkgver`** — 7.0.14
+     is already upstream.
+   - `device/testing/{device,firmware}-vsmart-zangyapro/` — device + firmware packages, one
+     commit (pmaports `COMMITSTYLE.md` requires device-specific firmware in the same commit as
+     the device). `board-2.bin` (WCN3990 RF-calibration) is self-hosted in `vendor-blobs/`
+     (excluded from the MR) and fetched via a **commit-pinned** raw GitHub URL; `a512_zap.mbn`
+     (Adreno 512 zap) fetched from TheMuppets; `firmware-5.bin` (WCN3990 feature descriptor)
+     generated at build by `ath10k-fwencoder` — not a blob.
 
    Copy these into a [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout
-   and open a merge request following its `COMMITSTYLE.md` (GitLab — needs `glab`/GitLab auth,
-   not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for exact steps.
+   and open a merge request against **`main`**, following its `COMMITSTYLE.md` (GitLab — needs
+   `glab`/GitLab auth, not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for exact steps.
 3. **Wiki** — published at **[wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)](https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro))**. Source kept at [`wiki/Vsmart_Active_1.wiki`](wiki/Vsmart_Active_1.wiki).
+
+### After the pmaports MR merges — cleanup checklist
+
+Review will take weeks, so this is written down rather than remembered. Once the MR is merged
+upstream, the staging copies in this repo stop being the source of truth and start rotting:
+
+- [ ] Delete `pmaports-mr/` — MR staging notes, no purpose once merged.
+- [ ] Decide on `pmaports/` — the device and firmware packages now live upstream. Keeping the
+      mirror here means it silently diverges from pmaports; either delete it or add a note saying
+      upstream wins. Note `dev.sh sync` copies from this directory, so deleting it changes the
+      local build flow.
+- [ ] `wiki/Vsmart_Active_1.wiki`: set `packaged = yes` (L14), uncomment `devicepackage` (L36) and
+      `kernelpackage` (L37), and fill `initial_MR` (L42 — currently the `CHANGE_ME` placeholder).
+      Then apply the same edits to the live wiki page.
+- [ ] `docs/cheatsheet.md`: drop "*(Resolved once the port is upstreamed to pmaports.)*" from the
+      `apk upgrade -a` warning and rewrite what the warning now means.
+- [ ] `docs/porting-notes.md` "Protecting the local packages from apk": "absent from any public
+      repo" and "or upstreaming to pmaports" both become false.
+- [ ] Drop the three pinned packages from `/etc/apk/world` on the device and switch to the
+      upstream ones. **Do this deliberately, on a charger, with a backup** — it replaces the
+      running kernel.
+- [ ] Update `CLAUDE.md`: the "three local packages pinned" safety rule no longer applies.
 
 ## Environment notes
 
