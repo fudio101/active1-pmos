@@ -114,8 +114,8 @@ upstream, the staging copies in this repo stop being the source of truth and sta
       upstream wins. Note `dev.sh sync` copies from this directory, so deleting it changes the
       local build flow.
 - [ ] `wiki/Vsmart_Active_1.wiki`: set `packaged = yes` (L14), uncomment `devicepackage` (L36) and
-      `kernelpackage` (L37), and fill `initial_MR` (L42 — currently the `CHANGE_ME` placeholder).
-      Then apply the same edits to the live wiki page.
+      `kernelpackage` (L37). Then apply the same edits to the live wiki page. (`initial_MR` was
+      already set to `{{MR|9713|pmaports}}` on 2026-10-09, live and local.)
 - [ ] `docs/cheatsheet.md`: drop "*(Resolved once the port is upstreamed to pmaports.)*" from the
       `apk upgrade -a` warning and rewrite what the warning now means.
 - [ ] `docs/porting-notes.md` "Protecting the local packages from apk": "absent from any public

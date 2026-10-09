@@ -7,7 +7,7 @@
 | codename     = vsmart-zangyapro
 | model        = PQ6001
 | image        = File:vsmart-zangyapro.jpg
-| imagecaption = Vsmart Active 1 running postmarketOS
+| imagecaption = Vsmart Active 1 running Nura
 | releaseyear  = 2018
 
 | booting  = yes
@@ -29,7 +29,7 @@
 | originalversion  = 9
 | status_fossbootloader = N
 
-<!-- postmarketOS -->
+<!-- Nura -->
 | type          = handset
 | pmoskernel    = Mainline 7.0.x
 | whet_dhry     = 0.0
@@ -39,7 +39,7 @@
 
 | supported      = yes
 | prebuiltimages = no
-| initial_MR   = <!-- {{MR|CHANGE_ME|pmaports}} once the MR is opened -->
+| initial_MR   = {{MR|9713|pmaports}}
 
 <!-- Features: Main -->
 | status_flashing = Y
@@ -99,7 +99,7 @@ this port is derived from the latter and shares its mainline kernel. It is used 
 
 {{Note|1=The Vsmart bootloader enforces dm-android-verity and injects <code>skip_initramfs</code> /
 <code>dm=...android-verity...</code> into the kernel command line, which blocks Android GSIs. The mainline
-kernel ignores these parameters (they are passed to userspace), so postmarketOS boots without any verity
+kernel ignores these parameters (they are passed to userspace), so Nura boots without any verity
 workaround. '''lk2nd is not required.'''}}
 
 == Contributors ==
