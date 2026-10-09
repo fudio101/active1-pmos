@@ -12,7 +12,7 @@ is **`main`**.
 > motivation. So the dts and the HX83112A driver **already ship in the packaged kernel**; all
 > that is left is switching the panel driver on.
 
-## Two commits (per pmaports `COMMITSTYLE.md` — new device + firmware in same commit)
+## Three commits (per pmaports `COMMITSTYLE.md` — new device + firmware in same commit)
 
 ### Commit 1: enable the panel in the shared SoC kernel
 
@@ -34,7 +34,17 @@ Alexey Minnekhanov. Keep the diff minimal.
   tarball's must not).
 - **Commit message:** `linux-postmarketos-qcom-sdm660: enable HX83112A panel driver`
 
-### Commit 2: new device + firmware (one commit per COMMITSTYLE)
+### Commit 2: options required by kconfigcheck
+
+`kconfigcheck.toml` on `main` gained rules after 7.0.14 (netavark aa96d340, CD/DVD c8b0f12f), so
+`kconfig check` fails on the unmodified `main` config — and CI runs it for every MR touching the
+kernel. Enables `NF_TABLES_NETDEV=y`, `NFT_FIB_NETDEV=m`, `BLK_DEV_SR=m` (+ the `CDROM=m` it
+selects, and the new `# ... is not set` NETDEV siblings), resolved with `olddefconfig` against the
+`v7.0.14-sdm660` tarball. No second `pkgrel` bump.
+
+- **Commit message:** `linux-postmarketos-qcom-sdm660: enable options required by kconfigcheck`
+
+### Commit 3: new device + firmware (one commit per COMMITSTYLE)
 
 Packages: `device/testing/device-vsmart-zangyapro/` + `device/testing/firmware-vsmart-zangyapro/`
 
@@ -127,13 +137,14 @@ glab mr create --source-branch vsmart-zangyapro --target-branch main \
 [x] Tag v7.0.14-sdm660 cut (2026-08-02)
 [x] pmaports bumped to 7.0.14 upstream (!9224, 263089a0) — no pkgver work needed
 [x] Fresh full pmaports clone on native Linux fs
-[ ] Commit 1: panel config + pkgrel, checksum, kconfig check
-[ ] Commit 2: device + firmware packages
+[x] Commit 1: panel config + pkgrel, checksum
+[x] Commit 2: kconfigcheck options (NF_TABLES_NETDEV, NFT_FIB_NETDEV, BLK_DEV_SR) — kconfig check passes
+[x] Commit 3: device + firmware packages (nura.eco URLs, rebased on main 2026-10-09)
 [ ] Real build from tarball; .ko + .dtb verified present in the apk
 [ ] Flash + boot test on device
 [ ] glab auth login --hostname gitlab.postmarketos.org (or use the web UI)
 [ ] Fork pmaports on GitLab, push branch vsmart-zangyapro
 [ ] Open MR against main, tick "Allow commits from members…", ping @alexeymin
-[x] Wiki published: https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)
+[x] Wiki published: https://wiki.nura.eco/wiki/Vsmart_Active_1_(vsmart-zangyapro)
 [ ] After merge: fill initial_MR in the wiki + run the cleanup checklist in ../README.md
 ```

@@ -19,7 +19,15 @@ this repo has packaged since 263089a0. Only the Kconfig symbol was still off.
 
    Thank you for the 7.0.14 bump in !9224 — that is what unblocked this.
 
-2. **`vsmart-zangyapro: new device`** — device + firmware packages, in one commit per
+2. **`linux-postmarketos-qcom-sdm660: enable options required by kconfigcheck`** — not
+   device-specific. `kconfigcheck.toml` gained rules after the 7.0.14 bump (netavark in
+   aa96d340, CD/DVD in c8b0f12f), so `pmbootstrap kconfig check` fails on `main` as-is and the
+   `kernel-kconfig` job would fail for any MR touching this package. This enables
+   `NF_TABLES_NETDEV=y`, `NFT_FIB_NETDEV=m` and `BLK_DEV_SR=m` (which selects `CDROM=m`);
+   dependencies resolved with `olddefconfig` against `v7.0.14-sdm660`. No extra `pkgrel` bump —
+   commit 1 already carries it. Happy to split this into its own MR if you prefer.
+
+3. **`vsmart-zangyapro: new device`** — device + firmware packages, in one commit per
    `COMMITSTYLE.md`.
 
 ### Firmware
@@ -45,5 +53,11 @@ up; it runs as a headless server. Touch is not wired up yet, which is why the de
 `testing`. Local validation before pushing: `pmbootstrap kconfig check` passes, the kernel builds
 from the release tarball (not `--src`), and `panel-himax-hx83112a.ko` plus
 `boot/dtbs/qcom/sdm660-vsmart-zangyapro.dtb` are both confirmed present in the resulting apk.
+`pmbootstrap ci` (apkbuild-lint, kconfig, verify-checksums, check-changed-versions, pytest, …)
+passes locally.
 
-Wiki: https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)
+The boot test above was done with the panel driver enabled; the exact `7.0.14-r1` build from this
+branch (which also carries commit 2's extra modules) has not been flashed yet — I'll post the
+result in this thread.
+
+Wiki: https://wiki.nura.eco/wiki/Vsmart_Active_1_(vsmart-zangyapro)
