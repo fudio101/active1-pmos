@@ -30,8 +30,9 @@ package() {
 	ln -s ../$pkgname-console-blank.service "$sd"/multi-user.target.wants/
 
 	# Hold the battery at 70-80 % while plugged in 24/7 (battery = built-in UPS; less
-	# swelling and less charging heat). Needs qcom_smbx charge_behaviour (kernel patch,
-	# .scratch/active1-next-phase/issues/04); exits as a no-op without it.
+	# swelling and less charging heat). Needs qcom_smbx charge_behaviour: sdm660-mainline
+	# qcom-sdm660-7.2.y 636bbe59c66b (correct battery status also needs PR #234,
+	# chg-state-change irq). Exits as a no-op on kernels without it (pmaports 7.0.14).
 	install -Dm755 "$srcdir"/charge-limit "$pkgdir"/usr/libexec/$pkgname/charge-limit
 	install -Dm644 "$srcdir"/charge-limit.service "$sd"/$pkgname-charge-limit.service
 	ln -s ../$pkgname-charge-limit.service "$sd"/multi-user.target.wants/
