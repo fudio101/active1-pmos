@@ -5,7 +5,7 @@
 #   apk add --allow-untrusted vsmart-zangyapro-homeserver-*.apk
 pkgname=vsmart-zangyapro-homeserver
 pkgver=1
-pkgrel=1
+pkgrel=2
 pkgdesc="Vsmart Active 1 server profile: headless home-server policy (local, not upstream)"
 url="https://github.com/fudio101/active1-pmos"
 arch="noarch"
@@ -13,6 +13,8 @@ license="MIT"
 depends="device-vsmart-zangyapro"
 options="!check"
 source="
+	charge-limit
+	charge-limit.service
 	console-blank
 	console-blank.service
 	"
@@ -27,12 +29,21 @@ package() {
 	mkdir -p "$sd"/multi-user.target.wants
 	ln -s ../$pkgname-console-blank.service "$sd"/multi-user.target.wants/
 
+	# Hold the battery at 70-80 % while plugged in 24/7 (battery = built-in UPS; less
+	# swelling and less charging heat). Needs qcom_smbx charge_behaviour (kernel patch,
+	# .scratch/active1-next-phase/issues/04); exits as a no-op without it.
+	install -Dm755 "$srcdir"/charge-limit "$pkgdir"/usr/libexec/$pkgname/charge-limit
+	install -Dm644 "$srcdir"/charge-limit.service "$sd"/$pkgname-charge-limit.service
+	ln -s ../$pkgname-charge-limit.service "$sd"/multi-user.target.wants/
+
 	# No login prompt on the panel: agetty 2.42 reprints "login:" on every IP address
 	# netlink event, so the panel fills up. Keyboard login still works on tty2 (Ctrl+Alt+F2,
 	# logind autovt). See .scratch/active1-next-phase/issues/14.
 	ln -s /dev/null "$sd"/getty@tty1.service
 }
 sha512sums="
+df4de67ea19044568c99593486e63b0f8ed0af9b54de6464037316dc33ec515dff688a8868fe206efc4dbe358144bc519de8aeeff423129bc2d8a3fef547d1ae  charge-limit
+72c9495db57459c16cb1631b44958c5ad02903f96cd3d4ec7a2a234330c05980d23dbc07a846adb50b0cc5dc44c86bf9690e6cff120049ee9bbb3f9d0111c456  charge-limit.service
 cf39bab2196ac8fe56d168bc519954db7b742b8cefa2fddf65f1a6304d42eddd45fa1f9009287fab96af0836728df0c4955683f857e8518b1d14f03665e7f754  console-blank
 9e6652f5b13a0fba11dab76af728526bc5fd655fbc51547987c7ed7d57154f6b364509e7ab2caee2ef00e3af9012910b76511291005756aa4fbcfe9c73a446ef  console-blank.service
 "

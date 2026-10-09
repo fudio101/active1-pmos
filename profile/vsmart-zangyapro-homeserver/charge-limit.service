@@ -1,0 +1,16 @@
+[Unit]
+Description=Hold the battery at a partial charge while plugged in (headless server profile)
+After=sysinit.target
+
+[Service]
+Type=simple
+# Override with a drop-in, e.g. Environment=CHARGE_STOP=60 CHARGE_START=50
+Environment=CHARGE_STOP=80 CHARGE_START=70 CHARGE_INTERVAL=60
+ExecStart=/usr/libexec/vsmart-zangyapro-homeserver/charge-limit
+# Never leave charging inhibited when the limiter is not running
+ExecStopPost=/usr/libexec/vsmart-zangyapro-homeserver/charge-limit --reset
+Restart=on-failure
+RestartSec=30
+
+# No [Install]: the package enables it with its own multi-user.target.wants symlink
+# in /usr/lib, so it is "static" and starts on every boot without any enable step.

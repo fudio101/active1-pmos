@@ -1,0 +1,36 @@
+#!/bin/sh
+# Hold the battery between START and STOP percent while the phone stays plugged in, using the
+# charger's standard charge_behaviour property (inhibit-charge keeps the system on USB power
+# and only stops charging the battery). Needs a kernel whose qcom_smbx exposes
+# charge_behaviour; without it this does nothing. It never falls back to the status write,
+# because that suspends USB input and would cycle the battery.
+STOP="${CHARGE_STOP:-80}"
+START="${CHARGE_START:-70}"
+INTERVAL="${CHARGE_INTERVAL:-60}"
+BAT=/sys/class/power_supply/qcom-battery/capacity
+CHG=/sys/class/power_supply/pm660-charger/charge_behaviour
+
+if [ ! -w "$CHG" ]; then
+	echo "charge-limit: $CHG missing (kernel without charge_behaviour), not limiting"
+	exit 0
+fi
+
+if [ "$1" = "--reset" ]; then
+	echo auto > "$CHG"
+	exit 0
+fi
+
+echo "charge-limit: holding the battery between $START% and $STOP%"
+while :; do
+	cap=$(cat "$BAT" 2>/dev/null)
+	# current mode, e.g. "auto [inhibit-charge] force-discharge" -> inhibit-charge
+	mode=$(sed -n 's/.*\[\(.*\)\].*/\1/p' "$CHG")
+	if [ -n "$cap" ]; then
+		if [ "$cap" -ge "$STOP" ] && [ "$mode" != inhibit-charge ]; then
+			echo inhibit-charge > "$CHG" && echo "charge-limit: $cap% >= $STOP%, inhibit-charge"
+		elif [ "$cap" -le "$START" ] && [ "$mode" != auto ]; then
+			echo auto > "$CHG" && echo "charge-limit: $cap% <= $START%, auto"
+		fi
+	fi
+	sleep "$INTERVAL"
+done
