@@ -12,7 +12,7 @@ for the open items.
   Bluetooth (WCN3990), GPU (Adreno 512 / freedreno FD512), **DSI display** (Himax HX83112A DJN
   1080×2160, real DPU + DSI + panel console — not simple-framebuffer), SSH, charging (with a
   ≥2 A charger), A/B-slot survival across reboots (`qbootctl`).
-- **Open:** touchscreen parked; per-device WiFi MAC is random; modem untested. (Soft reboot,
+- **Open:** touchscreen parked; modem untested. (WiFi MAC: stable per connection via bootmac + NM `cloned-mac-address=stable`; it changes only on reinstall. See .scratch issue 05.) (Soft reboot,
   previously thought broken, now works on a healthy battery — see the reboot note below.)
 - **Firmware:** `firmware-vsmart-zangyapro` (hard dep of `device-vsmart-zangyapro`) provides:
   `board-2.bin` (WCN3990 RF-calibration, self-hosted in `vendor-blobs/` — linux-firmware's copy

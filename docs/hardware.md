@@ -18,7 +18,7 @@ Stock values were read from the stock dtb (`/tmp/dtbs`). See `porting-notes.md` 
 bring-up details and the open items.
 | Block | Reference values | Status |
 |---|---|---|
-| WiFi/BT | `qca,wcn3990` + `qcom,icnss`; firmware `board-2.bin` (ath10k WCN3990) | **Works** (firmware ships in `firmware-vsmart-zangyapro`; absent during `fastboot boot`). MAC is random. |
+| WiFi/BT | `qca,wcn3990` + `qcom,icnss`; firmware `board-2.bin` (ath10k WCN3990) | **Works** (firmware ships in `firmware-vsmart-zangyapro`; absent during `fastboot boot`). MAC: serial-derived via bootmac; NM uses a stable per-connection MAC. |
 | GPU | Adreno 512; zap shader `a512_zap.mbn` (from stock `vendor_a/firmware/a512_zap.elf`) | **Works** (freedreno FD512); firmware in `firmware-vsmart-zangyapro`. |
 | Panel | "DJN hx83112a 1080p video mode" (`qcom,mdss_dsi_hx83112a_djn_fhd_video`) | **Works** — DRM DSI panel via `djn,a1-hx83112a` variant added to mainline `panel-himax-hx83112a` (vddio=L11A, LAB/IBB=`lcdb` 5.4V, reset gpio53, backlight pm660l_wled). Minimal init (no reset) leaning on bootloader IC init. |
 | Touch | Himax **HX83112A** TDDI, i2c-0 @ **0x48**, irq gpio67, rst gpio66, product id **0x83112a** | **WIP / parked** — mainline `himax_hx83112b` only knows id 0x83112b; needs an hx83112a variant. |
