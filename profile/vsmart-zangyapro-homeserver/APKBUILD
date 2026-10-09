@@ -5,12 +5,15 @@
 #   apk add --allow-untrusted vsmart-zangyapro-homeserver-*.apk
 pkgname=vsmart-zangyapro-homeserver
 pkgver=1
-pkgrel=3
+pkgrel=4
 pkgdesc="Vsmart Active 1 server profile: headless home-server policy (local, not upstream)"
 url="https://github.com/fudio101/active1-pmos"
 arch="noarch"
 license="MIT"
-depends="device-vsmart-zangyapro"
+depends="
+	bluez
+	device-vsmart-zangyapro
+	"
 options="!check"
 source="
 	charge-limit
@@ -41,6 +44,10 @@ package() {
 	# Keep the serial-derived WiFi MAC from bootmac, so DHCP reservations survive reinstalls.
 	install -Dm644 "$srcdir"/nm-wifi-mac.conf \
 		"$pkgdir"/usr/lib/NetworkManager/conf.d/60-$pkgname-wifi-mac.conf
+
+	# Start Bluetooth at boot (BT keyboard on the headless box). This used to live in the
+	# device package; upstream it is a user choice, so it moved here.
+	ln -s ../bluetooth.service "$sd"/multi-user.target.wants/
 
 	# No login prompt on the panel: agetty 2.42 reprints "login:" on every IP address
 	# netlink event, so the panel fills up. Keyboard login still works on tty2 (Ctrl+Alt+F2,
