@@ -27,6 +27,8 @@ for the open items.
 - WSL flashing: `FASTBOOT=/mnt/c/adb/fastboot.exe ./dev.sh flash`. Large `userdata` transfers
   fail over 32-bit `fastboot.exe`; split into ~20 MB sparse chunks (`img2simg` + `simg2simg`)
   and flash sequentially.
+- Slow flashing / USB 3 ports not detected in fastboot, and updating the kernel over SSH with no
+  reflash: see [`flashing.md`](flashing.md).
 - Regenerate the kernel patch for upstreaming: `./dev.sh patch`.
 - If `pmbootstrap install` fails with exit 125 (`busybox su pmos ... mkdir rootfs`), run
   `pmbootstrap shutdown` and retry (re-registers the qemu binfmt).

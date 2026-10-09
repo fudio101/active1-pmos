@@ -19,7 +19,8 @@ DPU+DSI panel console), SSH, charging (with a ≥2 A charger), and A/B-slot surv
 reboots (`qbootctl`). Soft reboot — once thought broken — works on a healthy battery (the
 earlier hangs were a low-power brownout). Known issue: the touchscreen is parked. See
 [`docs/porting-notes.md`](docs/porting-notes.md), [`docs/hardware.md`](docs/hardware.md),
-[`docs/connecting.md`](docs/connecting.md) and [`docs/cheatsheet.md`](docs/cheatsheet.md).
+[`docs/connecting.md`](docs/connecting.md), [`docs/cheatsheet.md`](docs/cheatsheet.md) and
+[`docs/flashing.md`](docs/flashing.md) (faster flashing, updating the kernel without fastboot).
 
 ## Layout (mirrors upstream paths)
 
@@ -37,7 +38,7 @@ kernel/
   sdm660-xiaomi-jasmine.dts                         # upstream template (reference)
   *.patch                                           # kernel patch for upstreaming
 wiki/Vsmart_Active_1.wiki                            # source for the live wiki page
-docs/hardware.md  docs/porting-notes.md
+docs/hardware.md  docs/porting-notes.md  docs/flashing.md
 build-output/                                       # boot image + build logs (gitignored)
 scripts/                                            # one-off scripts used during bring-up
 ```
