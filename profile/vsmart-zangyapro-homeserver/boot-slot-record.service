@@ -1,0 +1,10 @@
+[Unit]
+Description=Remember which boot image this boot came from (headless server profile)
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/vsmart-zangyapro-homeserver/boot-slot-mirror record
+
+# No [Install]: the package enables it with its own multi-user.target.wants symlink
+# in /usr/lib, so it is "static" and starts on every boot without any enable step.

@@ -5,7 +5,7 @@
 #   apk add --allow-untrusted vsmart-zangyapro-homeserver-*.apk
 pkgname=vsmart-zangyapro-homeserver
 pkgver=1
-pkgrel=4
+pkgrel=5
 pkgdesc="Vsmart Active 1 server profile: headless home-server policy (local, not upstream)"
 url="https://github.com/fudio101/active1-pmos"
 arch="noarch"
@@ -16,6 +16,10 @@ depends="
 	"
 options="!check"
 source="
+	boot-slot-mirror
+	boot-slot-mirror.service
+	boot-slot-mirror.timer
+	boot-slot-record.service
 	charge-limit
 	charge-limit.service
 	console-blank
@@ -49,12 +53,26 @@ package() {
 	# device package; upstream it is a user choice, so it moved here.
 	ln -s ../bluetooth.service "$sd"/multi-user.target.wants/
 
+	# Keep the other A/B boot slot as a copy of a boot image that has proven itself, so a
+	# kernel that fails to boot falls back to a pmOS kernel and not the stock Android one.
+	install -Dm755 "$srcdir"/boot-slot-mirror "$pkgdir"/usr/libexec/$pkgname/boot-slot-mirror
+	install -Dm644 "$srcdir"/boot-slot-record.service "$sd"/$pkgname-boot-slot-record.service
+	install -Dm644 "$srcdir"/boot-slot-mirror.service "$sd"/$pkgname-boot-slot-mirror.service
+	install -Dm644 "$srcdir"/boot-slot-mirror.timer "$sd"/$pkgname-boot-slot-mirror.timer
+	ln -s ../$pkgname-boot-slot-record.service "$sd"/multi-user.target.wants/
+	mkdir -p "$sd"/timers.target.wants
+	ln -s ../$pkgname-boot-slot-mirror.timer "$sd"/timers.target.wants/
+
 	# No login prompt on the panel: agetty 2.42 reprints "login:" on every IP address
 	# netlink event, so the panel fills up. Keyboard login still works on tty2 (Ctrl+Alt+F2,
 	# logind autovt). See .scratch/active1-next-phase/issues/14.
 	ln -s /dev/null "$sd"/getty@tty1.service
 }
 sha512sums="
+415b3229106b073755c3fcdd1ab553b8263c0b6f0f63fa70cf9fb1ef52198d709b239265ad9b99adc44b5c7fe9e73e1655017aaa1f2333f1c5de5147f83c64e9  boot-slot-mirror
+c9ebb038396c145f4b9948f57ca6fb358c9ac0333549c818fc399733e843477938689905908f807c082373c13a022798bb5329b13358e28a4e7261bf83f97c14  boot-slot-mirror.service
+e5fca7495489fb74bfb4cdb141dbd9dc33608fa6e9867b4e5bf2501fe225b68b5cb597c8e4bcc3d4ded44727f70a9cb13fdb834e159048e2c355ec3aad2b299a  boot-slot-mirror.timer
+5fda47f9bfff77033409a35bccd4827481beda1c86a3095465eae342f6ecbccac36b76b369bb9d274b4d691273e4ad870fc20eab24df52c0a943ff260c0487de  boot-slot-record.service
 df4de67ea19044568c99593486e63b0f8ed0af9b54de6464037316dc33ec515dff688a8868fe206efc4dbe358144bc519de8aeeff423129bc2d8a3fef547d1ae  charge-limit
 72c9495db57459c16cb1631b44958c5ad02903f96cd3d4ec7a2a234330c05980d23dbc07a846adb50b0cc5dc44c86bf9690e6cff120049ee9bbb3f9d0111c456  charge-limit.service
 cf39bab2196ac8fe56d168bc519954db7b742b8cefa2fddf65f1a6304d42eddd45fa1f9009287fab96af0836728df0c4955683f857e8518b1d14f03665e7f754  console-blank

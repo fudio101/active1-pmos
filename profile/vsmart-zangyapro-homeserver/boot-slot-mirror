@@ -1,0 +1,70 @@
+#!/bin/sh
+# Keep the other A/B boot slot as a copy of a boot image that is known to work.
+# ABL falls back to the other slot when the active one keeps failing to boot, but boot-deploy
+# only writes the current slot, and on this phone the other slot held the stock Android
+# kernel, which cannot boot the pmOS rootfs. So once a boot has proven itself, copy it over.
+#   record  at boot: remember the hash of the boot partition that was just booted
+#   mirror  later:   if the system is up and that partition is unchanged, copy it across
+# The fallback kernel boots (panel and USB networking live in the initramfs), but after a
+# kernel upgrade its modules are gone from /lib/modules, so expect no WiFi; use USB to fix.
+set -eu
+STATE=/run/boot-slot-mirror.sha256
+
+cur=$(qbootctl -x)
+case "$cur" in
+_a) other=_b ;;
+_b) other=_a ;;
+*)
+	echo "boot-slot-mirror: no A/B slot suffix ($cur), nothing to do"
+	exit 0
+	;;
+esac
+src=$(findfs PARTLABEL="boot$cur")
+dst=$(findfs PARTLABEL="boot$other")
+
+case "${1:-}" in
+record)
+	sha256sum < "$src" > "$STATE"
+	;;
+mirror)
+	if [ ! -s "$STATE" ]; then
+		echo "boot-slot-mirror: no hash recorded at boot, not mirroring"
+		exit 0
+	fi
+	# A kernel upgrade rewrites boot$cur before the reboot that tests it; never copy that.
+	if ! sha256sum < "$src" | cmp -s - "$STATE"; then
+		echo "boot-slot-mirror: boot$cur changed since boot (kernel update pending?), not mirroring"
+		exit 0
+	fi
+	state=$(systemctl is-system-running || true)
+	case "$state" in
+	running|degraded) ;;
+	*)
+		echo "boot-slot-mirror: system is $state, not mirroring"
+		exit 0
+		;;
+	esac
+	case "$(qbootctl -n "${cur#_}")" in
+	*"is marked successful"*) ;;
+	*)
+		echo "boot-slot-mirror: boot$cur is not marked successful, not mirroring"
+		exit 0
+		;;
+	esac
+	if cmp -s "$src" "$dst"; then
+		echo "boot-slot-mirror: boot$other already matches boot$cur"
+		exit 0
+	fi
+	echo "boot-slot-mirror: copying boot$cur to boot$other"
+	dd if="$src" of="$dst" bs=1M conv=fsync 2>/dev/null
+	if ! cmp -s "$src" "$dst"; then
+		echo "boot-slot-mirror: verify failed, boot$other differs from boot$cur"
+		exit 1
+	fi
+	echo "boot-slot-mirror: boot$other now holds the image this system booted"
+	;;
+*)
+	echo "usage: $0 record|mirror" >&2
+	exit 2
+	;;
+esac

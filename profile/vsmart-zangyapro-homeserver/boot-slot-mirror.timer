@@ -1,0 +1,8 @@
+[Unit]
+Description=Mirror the boot slot once the system has been up for a while (headless server profile)
+
+[Timer]
+# Long enough that a kernel which boots but falls over soon after is not copied.
+OnBootSec=15min
+
+# No [Install]: the package enables it with its own timers.target.wants symlink in /usr/lib.

@@ -1,0 +1,7 @@
+[Unit]
+Description=Copy a boot image that has proven itself to the other A/B slot (headless server profile)
+After=vsmart-zangyapro-homeserver-boot-slot-record.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/vsmart-zangyapro-homeserver/boot-slot-mirror mirror
