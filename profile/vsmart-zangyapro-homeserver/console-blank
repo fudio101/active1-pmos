@@ -1,0 +1,4 @@
+#!/bin/sh
+# Set the VT blank timeout (minutes) by writing the Linux console escape ESC[9;N] to tty1.
+# /sys/module/kernel/parameters/consoleblank is read-only, so this is the runtime knob.
+printf '\033[9;%s]' "${1:-1}" > /dev/tty1

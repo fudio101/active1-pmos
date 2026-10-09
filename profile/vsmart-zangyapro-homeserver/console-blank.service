@@ -1,0 +1,11 @@
+[Unit]
+Description=Blank the panel console when idle (headless server profile)
+ConditionPathExists=/dev/tty1
+After=systemd-vconsole-setup.service plymouth-quit.service plymouth-quit-wait.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/vsmart-zangyapro-homeserver/console-blank 1
+
+# No [Install]: the package enables it with its own multi-user.target.wants symlink
+# in /usr/lib, so it is "static" and starts on every boot without any enable step.

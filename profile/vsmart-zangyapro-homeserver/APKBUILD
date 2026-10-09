@@ -1,0 +1,38 @@
+# Server profile for the Vsmart Active 1: the policy that turns a fresh install into a headless
+# home server. LOCAL ONLY. It is never part of an upstream pmaports MR. Hardware fixes belong in
+# the kernel / device / firmware packages instead; this package holds only policy.
+# Built and added to the rootfs by `dev.sh install`. On a running device:
+#   apk add --allow-untrusted vsmart-zangyapro-homeserver-*.apk
+pkgname=vsmart-zangyapro-homeserver
+pkgver=1
+pkgrel=1
+pkgdesc="Vsmart Active 1 server profile: headless home-server policy (local, not upstream)"
+url="https://github.com/fudio101/active1-pmos"
+arch="noarch"
+license="MIT"
+depends="device-vsmart-zangyapro"
+options="!check"
+source="
+	console-blank
+	console-blank.service
+	"
+
+package() {
+	local sd="$pkgdir"/usr/lib/systemd/system
+
+	# Blank the panel (DPMS off + backlight off) after 1 min of console idle. Nothing else
+	# sets a blank timeout once the tty1 getty is gone. A key press on the VT wakes it.
+	install -Dm755 "$srcdir"/console-blank "$pkgdir"/usr/libexec/$pkgname/console-blank
+	install -Dm644 "$srcdir"/console-blank.service "$sd"/$pkgname-console-blank.service
+	mkdir -p "$sd"/multi-user.target.wants
+	ln -s ../$pkgname-console-blank.service "$sd"/multi-user.target.wants/
+
+	# No login prompt on the panel: agetty 2.42 reprints "login:" on every IP address
+	# netlink event, so the panel fills up. Keyboard login still works on tty2 (Ctrl+Alt+F2,
+	# logind autovt). See .scratch/active1-next-phase/issues/14.
+	ln -s /dev/null "$sd"/getty@tty1.service
+}
+sha512sums="
+cf39bab2196ac8fe56d168bc519954db7b742b8cefa2fddf65f1a6304d42eddd45fa1f9009287fab96af0836728df0c4955683f857e8518b1d14f03665e7f754  console-blank
+9e6652f5b13a0fba11dab76af728526bc5fd655fbc51547987c7ed7d57154f6b364509e7ab2caee2ef00e3af9012910b76511291005756aa4fbcfe9c73a446ef  console-blank.service
+"

@@ -35,6 +35,9 @@ FASTBOOT="${FASTBOOT:-fastboot}"                 # WSL: set FASTBOOT=/mnt/c/adb/
 
 DTS_SRC="$HERE/kernel/$DTS"
 DEVPKG_SRC="$HERE/pmaports/device/testing/device-$DEVICE"
+# Server profile: headless home-server policy, local only (never in the upstream MR).
+PROFILE_PKG="$DEVICE-homeserver"
+PROFILE_SRC="$HERE/profile/$PROFILE_PKG"
 
 pmb(){ (cd "$PMB" && ./pmbootstrap.py "$@"); }
 say(){ printf '\033[1;36m== %s\033[0m\n' "$*"; }
@@ -66,6 +69,12 @@ cmd_sync(){    # push dts + device package into the live build trees
   local FW="$APORTS/device/testing/firmware-$DEVICE"; mkdir -p "$FW"
   cp -v "$FW_SRC"/* "$FW/"
   pmb checksum "firmware-$DEVICE"
+  say "sync server profile package -> pmaports (local only, git-excluded there)"
+  local PR="$APORTS/device/testing/$PROFILE_PKG"; mkdir -p "$PR"
+  cp -v "$PROFILE_SRC"/* "$PR/"
+  local EX="$APORTS/.git/info/exclude"
+  grep -qx "/device/testing/$PROFILE_PKG/" "$EX" 2>/dev/null || echo "/device/testing/$PROFILE_PKG/" >> "$EX"
+  pmb checksum "$PROFILE_PKG"
   pmb config device "$DEVICE" >/dev/null; pmb config user "$SSH_USER" >/dev/null
   say "synced"
 }
@@ -96,11 +105,12 @@ cmd_install(){
   # Pre-build local packages so pmb install finds them cached and skips building.
   # Without this, pmb install builds them mid-flow, strict-mode zaps chroot_native,
   # then the rootfs mkdir step fails because chroot_native is gone.
-  say "pre-build local packages (device + firmware)"
+  say "pre-build local packages (device + firmware + server profile)"
   pmb build "device-$DEVICE"
   pmb build "firmware-$DEVICE"
+  pmb build "$PROFILE_PKG"
   say "install rootfs+boot (pass=$PASS)"
-  pmb install --password "$PASS"
+  pmb install --password "$PASS" --add "$PROFILE_PKG"
 }
 cmd_export(){  say "export -> $EXPORT_DIR"; pmb export "$EXPORT_DIR"; ls -la "$EXPORT_DIR"; }
 cmd_all(){     cmd_sync; cmd_build; cmd_install; cmd_export; echo; say "next: put phone in fastboot, then ./dev.sh flash"; }
