@@ -12,6 +12,7 @@ Nearly identical to the **Xiaomi Mi A2 (jasmine)** — `sdm660-xiaomi-jasmine.dt
 | USB | OK | NCM gadget; host 172.16.42.2, phone 172.16.42.1 |
 | Display console | OK | DRM DPU+DSI+panel (`card0-DSI-1`), HX83112A DJN 1080x2160 |
 | Charger / battery | OK | `pm660-charger` + `qcom-battery` (PMI8998 FG); needs a >=2 A charger |
+| Parallel charger | Stopgap | SMB1351/1350 @ i2c `0x1d` (blsp_i2c2), no mainline driver; configured from userspace by the server profile. Notes: [`smb1351/README.md`](smb1351/README.md) |
 
 ## Peripherals (status + reference values)
 Stock values were read from the stock dtb (`/tmp/dtbs`). See `porting-notes.md` for the

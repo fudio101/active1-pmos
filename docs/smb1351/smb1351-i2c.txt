@@ -1,0 +1,12 @@
+# SMB1351 @ i2c-0 0x1d (blsp_i2c2, enabled by TEST-ONLY DT commit 44baa1248f04), 2026-10-10, plugged into a PC (SDP)
+# Only answers with VBUS present (no ACK on battery alone).
+# auto, right after plug-in:
+00: 02 1d 07 f2 88 11 6b 15 00 18 5b 40 02 04 98 0f
+10: 4d 83 70 e4 9c a9 3a 0f f1 68 31 ff 7e 0a c4 0f
+20: 80 a0 9f 94 02 02 46 09 7a 03 c9 01 50 32 b2 0f
+30: 00 00 00 9d 00 9d 16 10 32 00 09 10 88 00 08 02
+40: 00 00 00 00 00 00 c0 00 9d 9d 9d 9d 9d 9d 9d 9d
+# force-discharge (PM660 USBIN suspended), 10-40 s, stable:
+30: 00 00 00 9d 00 9d 46 11 32 80 05 10 88 00 08 02
+# back to auto:
+30: 00 00 00 9d 00 9d 56 11 32 00 00 10 88 00 08 02
