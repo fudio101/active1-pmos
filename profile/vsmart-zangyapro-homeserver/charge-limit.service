@@ -5,7 +5,9 @@ After=sysinit.target
 [Service]
 Type=simple
 # Override with a drop-in, e.g. Environment=CHARGE_STOP=60 CHARGE_START=50
+# CHARGE_DRAIN_MARGIN=0 turns off draining with force-discharge.
 Environment=CHARGE_STOP=80 CHARGE_START=70 CHARGE_INTERVAL=60
+Environment=CHARGE_DRAIN_MARGIN=5 CHARGE_DRAIN_INTERVAL=5
 ExecStart=/usr/libexec/vsmart-zangyapro-homeserver/charge-limit
 # Never leave charging inhibited when the limiter is not running
 ExecStopPost=/usr/libexec/vsmart-zangyapro-homeserver/charge-limit --reset

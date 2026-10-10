@@ -2,13 +2,23 @@
 # Hold the battery between START and STOP percent while the phone stays plugged in, using the
 # charger's standard charge_behaviour property (inhibit-charge keeps the system on USB power
 # and only stops charging the battery). Needs a kernel whose qcom_smbx exposes
-# charge_behaviour; without it this does nothing. It never falls back to the status write,
-# because that suspends USB input and would cycle the battery.
+# charge_behaviour; without it this does nothing. It never uses the status write, because that
+# suspends USB input on every cycle.
+#
+# Above STOP + DRAIN_MARGIN (e.g. right after a full charge) it drains down to STOP with
+# force-discharge instead of waiting for an unplug. force-discharge suspends the PM660 input,
+# and the board's SMB1351 parallel charger then charges toward 4.50 V unless smb1351-setup has
+# configured it. So it only drains while `smb1351-setup --check` passes, re-checks every
+# DRAIN_INTERVAL seconds, and falls back to inhibit-charge as soon as the check fails (for
+# example after a replug, which resets the SMB1351). DRAIN_MARGIN=0 disables draining.
 STOP="${CHARGE_STOP:-80}"
 START="${CHARGE_START:-70}"
 INTERVAL="${CHARGE_INTERVAL:-60}"
+DRAIN_MARGIN="${CHARGE_DRAIN_MARGIN:-5}"
+DRAIN_INTERVAL="${CHARGE_DRAIN_INTERVAL:-5}"
 BAT=/sys/class/power_supply/qcom-battery/capacity
 CHG=/sys/class/power_supply/pm660-charger/charge_behaviour
+SMB1351=/usr/libexec/vsmart-zangyapro-homeserver/smb1351-setup
 
 if [ ! -w "$CHG" ]; then
 	echo "charge-limit: $CHG missing (kernel without charge_behaviour), not limiting"
@@ -20,17 +30,47 @@ if [ "$1" = "--reset" ]; then
 	exit 0
 fi
 
-echo "charge-limit: holding the battery between $START% and $STOP%"
+# can_drain: force-discharge is offered and the SMB1351 cannot charge behind its back.
+can_drain() {
+	[ "$DRAIN_MARGIN" -gt 0 ] && grep -q force-discharge "$CHG" && "$SMB1351" --check
+}
+
+set_mode() {
+	echo "$1" > "$CHG" && echo "charge-limit: $2, $1"
+}
+
+echo "charge-limit: holding the battery between $START% and $STOP%" \
+	"(draining above $((STOP + DRAIN_MARGIN))% when possible)"
 while :; do
 	cap=$(cat "$BAT" 2>/dev/null)
 	# current mode, e.g. "auto [inhibit-charge] force-discharge" -> inhibit-charge
 	mode=$(sed -n 's/.*\[\(.*\)\].*/\1/p' "$CHG")
-	if [ -n "$cap" ]; then
-		if [ "$cap" -ge "$STOP" ] && [ "$mode" != inhibit-charge ]; then
-			echo inhibit-charge > "$CHG" && echo "charge-limit: $cap% >= $STOP%, inhibit-charge"
-		elif [ "$cap" -le "$START" ] && [ "$mode" != auto ]; then
-			echo auto > "$CHG" && echo "charge-limit: $cap% <= $START%, auto"
+	if [ -z "$cap" ]; then
+		sleep "$INTERVAL"
+		continue
+	fi
+
+	if [ "$mode" = force-discharge ]; then
+		if ! "$SMB1351" --check; then
+			set_mode inhibit-charge "SMB1351 not configured, stop draining at $cap%"
+		elif [ "$cap" -le "$STOP" ]; then
+			set_mode inhibit-charge "$cap% <= $STOP%, drained"
+		else
+			sleep "$DRAIN_INTERVAL"
+			continue
 		fi
+	elif [ "$cap" -ge $((STOP + DRAIN_MARGIN)) ] && can_drain; then
+		set_mode force-discharge "$cap% >= $((STOP + DRAIN_MARGIN))%, draining to $STOP%"
+		sleep "$DRAIN_INTERVAL"
+		continue
+	elif [ "$cap" -ge "$STOP" ]; then
+		# Would drain but cannot: get the SMB1351 configured (it may have lost its setup with
+		# no charger event to redo it), so the next round can drain.
+		[ "$cap" -ge $((STOP + DRAIN_MARGIN)) ] && [ "$DRAIN_MARGIN" -gt 0 ] &&
+			"$SMB1351" --if-needed
+		[ "$mode" != inhibit-charge ] && set_mode inhibit-charge "$cap% >= $STOP%"
+	elif [ "$cap" -le "$START" ] && [ "$mode" != auto ]; then
+		set_mode auto "$cap% <= $START%"
 	fi
 	sleep "$INTERVAL"
 done

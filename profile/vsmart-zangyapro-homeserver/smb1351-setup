@@ -14,6 +14,7 @@
 #
 # Usage: smb1351-setup              configure now (the systemd unit)
 #        smb1351-setup --if-needed  udev: start the unit only if not configured yet
+#        smb1351-setup --check      exit 0 only if configured (no output)
 ADDR=0x1d
 ONLINE=/sys/class/power_supply/pm660-charger/online
 
@@ -23,15 +24,6 @@ for d in /sys/bus/i2c/devices/i2c-*; do
 	*/c176000.i2c/*) bus=${d##*/i2c-} ;;
 	esac
 done
-if [ -z "$bus" ]; then
-	echo "smb1351-setup: blsp_i2c2 (c176000.i2c) not enabled in this kernel, nothing to do"
-	exit 0
-fi
-
-if [ "$(cat "$ONLINE" 2>/dev/null)" != 1 ]; then
-	echo "smb1351-setup: charger offline, SMB1351 unpowered, nothing to do"
-	exit 0
-fi
 
 # configured: 0 when the enable pin polarity and float voltage are already set.
 configured() {
@@ -40,11 +32,30 @@ configured() {
 	[ $((en & 0x60)) -eq $((0x40)) ] && [ $((fv & 0x3f)) -eq $((0x2d)) ]
 }
 
-# --if-needed: called by udev on every charger change (a plug-in raises a burst of them).
-# Quiet and quick; it only starts the setup unit when the chip is not configured yet.
+# --check: exit 0 only if the chip is reachable and configured (used by charge-limit before it
+# relies on force-discharge). Silent.
+if [ "$1" = "--check" ]; then
+	[ -n "$bus" ] && configured
+	exit
+fi
+
+# --if-needed: called by udev on every charger change (a plug-in raises a burst of them) and by
+# charge-limit when it wants to drain. Quiet and quick; it only starts the setup unit when the
+# bus exists, the charger is online and the chip is not configured yet.
 if [ "$1" = "--if-needed" ]; then
+	[ -n "$bus" ] && [ "$(cat "$ONLINE" 2>/dev/null)" = 1 ] || exit 0
 	configured && exit 0
 	exec systemctl --no-block start vsmart-zangyapro-homeserver-smb1351-setup.service
+fi
+
+if [ -z "$bus" ]; then
+	echo "smb1351-setup: blsp_i2c2 (c176000.i2c) not enabled in this kernel, nothing to do"
+	exit 0
+fi
+
+if [ "$(cat "$ONLINE" 2>/dev/null)" != 1 ]; then
+	echo "smb1351-setup: charger offline, SMB1351 unpowered, nothing to do"
+	exit 0
 fi
 
 if configured; then
