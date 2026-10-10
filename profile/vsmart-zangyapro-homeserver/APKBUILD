@@ -5,7 +5,7 @@
 #   apk add --allow-untrusted vsmart-zangyapro-homeserver-*.apk
 pkgname=vsmart-zangyapro-homeserver
 pkgver=1
-pkgrel=7
+pkgrel=8
 pkgdesc="Vsmart Active 1 server profile: headless home-server policy (local, not upstream)"
 url="https://github.com/fudio101/active1-pmos"
 arch="noarch"
@@ -13,6 +13,7 @@ license="MIT"
 depends="
 	bluez
 	device-vsmart-zangyapro
+	i2c-tools
 	tzdata
 	"
 options="!check"
@@ -26,6 +27,9 @@ source="
 	console-blank
 	console-blank.service
 	nm-wifi-mac.conf
+	smb1351-setup
+	smb1351-setup.service
+	smb1351.rules
 	timezone.conf
 	"
 
@@ -46,6 +50,16 @@ package() {
 	install -Dm755 "$srcdir"/charge-limit "$pkgdir"/usr/libexec/$pkgname/charge-limit
 	install -Dm644 "$srcdir"/charge-limit.service "$sd"/$pkgname-charge-limit.service
 	ln -s ../$pkgname-charge-limit.service "$sd"/multi-user.target.wants/
+
+	# Configure the SMB1351 parallel charger like stock (enable pin active high, float 4.40 V).
+	# Mainline leaves it on OTP defaults: always enabled with a 4.50 V float, so it charges
+	# whenever the PM660 suspends its input (force-discharge). Stopgap until a kernel driver
+	# does this. Needs a kernel whose DT enables blsp_i2c2; a no-op otherwise.
+	# See .scratch/active1-next-phase/issues/04.
+	install -Dm755 "$srcdir"/smb1351-setup "$pkgdir"/usr/libexec/$pkgname/smb1351-setup
+	install -Dm644 "$srcdir"/smb1351-setup.service "$sd"/$pkgname-smb1351-setup.service
+	ln -s ../$pkgname-smb1351-setup.service "$sd"/multi-user.target.wants/
+	install -Dm644 "$srcdir"/smb1351.rules "$pkgdir"/usr/lib/udev/rules.d/90-$pkgname-smb1351.rules
 
 	# Keep the serial-derived WiFi MAC from bootmac, so DHCP reservations survive reinstalls.
 	install -Dm644 "$srcdir"/nm-wifi-mac.conf \
@@ -83,5 +97,8 @@ df4de67ea19044568c99593486e63b0f8ed0af9b54de6464037316dc33ec515dff688a8868fe206e
 cf39bab2196ac8fe56d168bc519954db7b742b8cefa2fddf65f1a6304d42eddd45fa1f9009287fab96af0836728df0c4955683f857e8518b1d14f03665e7f754  console-blank
 9e6652f5b13a0fba11dab76af728526bc5fd655fbc51547987c7ed7d57154f6b364509e7ab2caee2ef00e3af9012910b76511291005756aa4fbcfe9c73a446ef  console-blank.service
 f1a001de09672f1ea68cd4e11970ec1374e26071ebfb1a34edbf9babadd406e3465620ed06cdae53e567ecf073b690f77b75728d94d32c52ac54447f6a00a169  nm-wifi-mac.conf
+3c09492cb5a285ef0fd4f6cfa922cc849515560c2e9a9f084a8251ca93268eada037db93326974f874da17f60c2b60cd91e693dcc58db33ea4e4edde787aa5bf  smb1351-setup
+e77f574ff40b88663d4650bd39b26a95419ab794d45fc96c412346d4eb7664202e94181c85972252c3f4f3d4f840ce508c54dfbe7c10fd29b2cc859d1116146f  smb1351-setup.service
+dc601ac5b07d08dea8b48b8711c2f5e99bf6440784577f10c34eedb20c02e3d7c154120b958a4342a04f63f0ee809c1b8fcc8e3091a5f49a103804c819a336cc  smb1351.rules
 6fc12244a6715293fc33a54d846a1b8dc718338531646f1b54ab46299aa954a147784ecbdfc5025928b076f567529a3f64483de6fe8538d248261a0dac02e722  timezone.conf
 "

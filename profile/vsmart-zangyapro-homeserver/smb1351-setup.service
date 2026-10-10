@@ -1,0 +1,11 @@
+[Unit]
+Description=Configure the SMB1351 parallel charger like stock (headless server profile)
+After=sysinit.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/vsmart-zangyapro-homeserver/smb1351-setup
+
+# No [Install]: the package enables it with its own multi-user.target.wants symlink in /usr/lib
+# for the boot-time run (charger already plugged), and the udev rule starts it again on every
+# charger change while plugged in.

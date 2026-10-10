@@ -1,0 +1,57 @@
+#!/bin/sh
+# Configure the board's SMB1351 parallel charger (I2C 0x1d on blsp_i2c2) the way stock Android
+# does, until a kernel driver does it. Mainline never touches the chip, so it runs on its OTP
+# defaults: enable pin active-low (and the PM660 holds that pin low, so it is always enabled)
+# and a 4.50 V float voltage on a 4.40 V battery. It then fast-charges the battery whenever the
+# PM660 suspends its USB input, which breaks charge_behaviour=force-discharge.
+#
+# Writes (volatile, lost when VBUS goes away, so this runs again on every plug-in):
+#   0x30 bit6      volatile config access
+#   0x06 bits 6:5  enable by pin, active high (the PM660 never raises it -> SMB1351 stays off)
+#   0x03 bits 5:0  float voltage 4400 mV ((4400 - 3500) / 20 = 0x2d)
+# The chip only answers on I2C while VBUS is present. Needs a kernel whose DT enables
+# blsp_i2c2; without it this does nothing.
+ADDR=0x1d
+ONLINE=/sys/class/power_supply/pm660-charger/online
+
+bus=
+for d in /sys/bus/i2c/devices/i2c-*; do
+	case "$(readlink -f "$d")" in
+	*/c176000.i2c/*) bus=${d##*/i2c-} ;;
+	esac
+done
+if [ -z "$bus" ]; then
+	echo "smb1351-setup: blsp_i2c2 (c176000.i2c) not enabled in this kernel, nothing to do"
+	exit 0
+fi
+
+if [ "$(cat "$ONLINE" 2>/dev/null)" != 1 ]; then
+	echo "smb1351-setup: charger offline, SMB1351 unpowered, nothing to do"
+	exit 0
+fi
+
+# Right after a plug-in the chip may not answer yet.
+i=0
+until i2cget -y "$bus" $ADDR 0x06 >/dev/null 2>&1; do
+	i=$((i + 1))
+	if [ $i -ge 10 ]; then
+		echo "smb1351-setup: no answer from SMB1351 at $ADDR on i2c-$bus"
+		exit 1
+	fi
+	sleep 1
+done
+
+i2cset -y -m 0x40 "$bus" $ADDR 0x30 0x40 &&
+i2cset -y -m 0x60 "$bus" $ADDR 0x06 0x40 &&
+i2cset -y -m 0x3f "$bus" $ADDR 0x03 0x2d || {
+	echo "smb1351-setup: write failed"
+	exit 1
+}
+
+en=$(( $(i2cget -y "$bus" $ADDR 0x06) & 0x60 ))
+fv=$(( $(i2cget -y "$bus" $ADDR 0x03) & 0x3f ))
+if [ $en -ne $((0x40)) ] || [ $fv -ne $((0x2d)) ]; then
+	echo "smb1351-setup: read-back mismatch (enable $en, float $fv)"
+	exit 1
+fi
+echo "smb1351-setup: SMB1351 on i2c-$bus set to enable-by-pin active high, float 4400 mV"
