@@ -92,25 +92,26 @@ Historical investigation (PS_HOLD theory, now believed not the cause):
   set HARD_RESET (0x85a=0x07, confirmed active) and bumped msm-poweroff priority 128->130 so
   PS_HOLD beats PSCI; `reboot` still hung, so reset type was not the cause. Both edits reverted.
 
-## KNOWN ISSUE: touchscreen (Himax HX83112A) - WIP, parked
-Only the **touch** half of the HX83112A is parked; the **display** half is done (see the panel
-section above). The two are separate drivers: the panel is a DRM/DSI driver, the touch is a
-separate i2c input driver.
-
-Hardware confirmed working at the bus level:
-- Touch IC is on blsp_i2c1 (i2c-0, c175000.i2c) at address **0x48** (irq gpio67, reset gpio66).
-- The IC responds and reports **product id 0x83112a** (the panel is a HX83112A TDDI).
-- Power/reset are fine (the in-cell touch is powered with the panel rail).
-Mainline driver himax_hx83112b only knows id 0x83112b. A DT node with
-compatible="himax,hx83112a" + a driver hx83112a chip variant was tried; the IC was read
-correctly (id 0x83112a) but probe still went through the hx83112b id-check path and failed
-with -EINVAL ("Unknown product id: 83112a"). The chip-variant selection needs another look
-(of_match vs i2c_get_match_data picking the wrong himax_chip). Reverted for now.
-To resume: add `static const struct himax_chip hx83112a_chip = { .id = 0x83112a,
-.check_id = himax_check_product_id, .read_events = himax_read_events };` + of_match
-"himax,hx83112a", enable CONFIG_TOUCHSCREEN_HIMAX_HX83112B, DT node touchscreen@48
-(reg 0x48, irq gpio67 LEVEL_LOW, reset gpio66, size 1080x2160). Verify the right chip
-variant is bound before debugging the protocol.
+## FIX: touchscreen (Himax HX83112A) - works with Luca Weiss' series (not merged yet)
+The touch half of the HX83112A TDDI is a separate i2c input driver from the DRM panel.
+- Touch IC is on blsp_i2c1 (c175000.i2c) at address **0x48** (irq gpio67, reset gpio66),
+  product id **0x83112a**. Powered with the panel rail.
+- Driver: Luca Weiss' series "Input: himax_hx83112b - Add HX83112A support" (2026-08-21,
+  `20260821-fp4-hx83112a-v1-*@fairphone.com` on lore/patchwork, still "New"). Patch 1/3 adds the
+  trivial-touch binding, 2/3 the hx83112a chip + an `init` hook. The init step is needed: the chip
+  boots into safe mode, so the driver clears the FW ISR register (0x9000005c), resets again and
+  writes 0xa55aa55a to 0x1000748c to enable the touch algorithm. Pointed out by kekzoz on our
+  commit 4b1a055 (it fixed their Gigaset GS4 too).
+- DT: `touchscreen@48` on &blsp_i2c1 (interrupts-extended tlmm 67 EDGE_FALLING, reset-gpios tlmm
+  66 ACTIVE_LOW, 1080x2160) + pinctrl gpio66/67 (16 mA, pull-up, from stock).
+  Kernel config: `CONFIG_TOUCHSCREEN_HIMAX_HX83112B=m`.
+- Tested 2026-10-10 on 7.2.3 (VM branch `test/...+i2c2+touch`, apk
+  `7.0.14_p20261010160807-r1`): IRQs and evdev frames 1:1 (1292/1291), X 3-1079, Y 1-2159, all
+  corners, up to 5 contacts. One "Failed to read input event: -5" when the panel was unblanked.
+- The earlier failed attempt ("Unknown product id: 83112a") was most likely a stale module; the
+  id check itself is correct.
+- When testing: evdev captures must run via `systemd-run`. A background `cat` started over SSH
+  under sudo dies when the session closes, which looks like "no events".
 
 ## FIX: A/B boot-slot retry -> dropped to fastboot
 A/B device. pmOS did not mark the slot successful, so the bootloader decremented slot_a retry
