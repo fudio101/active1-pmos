@@ -11,6 +11,9 @@
 #   0x03 bits 5:0  float voltage 4400 mV ((4400 - 3500) / 20 = 0x2d)
 # The chip only answers on I2C while VBUS is present. Needs a kernel whose DT enables
 # blsp_i2c2; without it this does nothing.
+#
+# Usage: smb1351-setup              configure now (the systemd unit)
+#        smb1351-setup --if-needed  udev: start the unit only if not configured yet
 ADDR=0x1d
 ONLINE=/sys/class/power_supply/pm660-charger/online
 
@@ -27,6 +30,25 @@ fi
 
 if [ "$(cat "$ONLINE" 2>/dev/null)" != 1 ]; then
 	echo "smb1351-setup: charger offline, SMB1351 unpowered, nothing to do"
+	exit 0
+fi
+
+# configured: 0 when the enable pin polarity and float voltage are already set.
+configured() {
+	en=$(i2cget -y "$bus" $ADDR 0x06 2>/dev/null) || return 1
+	fv=$(i2cget -y "$bus" $ADDR 0x03 2>/dev/null) || return 1
+	[ $((en & 0x60)) -eq $((0x40)) ] && [ $((fv & 0x3f)) -eq $((0x2d)) ]
+}
+
+# --if-needed: called by udev on every charger change (a plug-in raises a burst of them).
+# Quiet and quick; it only starts the setup unit when the chip is not configured yet.
+if [ "$1" = "--if-needed" ]; then
+	configured && exit 0
+	exec systemctl --no-block start vsmart-zangyapro-homeserver-smb1351-setup.service
+fi
+
+if configured; then
+	echo "smb1351-setup: SMB1351 on i2c-$bus already configured"
 	exit 0
 fi
 
@@ -48,10 +70,8 @@ i2cset -y -m 0x3f "$bus" $ADDR 0x03 0x2d || {
 	exit 1
 }
 
-en=$(( $(i2cget -y "$bus" $ADDR 0x06) & 0x60 ))
-fv=$(( $(i2cget -y "$bus" $ADDR 0x03) & 0x3f ))
-if [ $en -ne $((0x40)) ] || [ $fv -ne $((0x2d)) ]; then
-	echo "smb1351-setup: read-back mismatch (enable $en, float $fv)"
+if ! configured; then
+	echo "smb1351-setup: read-back mismatch (0x06 $en, 0x03 $fv)"
 	exit 1
 fi
 echo "smb1351-setup: SMB1351 on i2c-$bus set to enable-by-pin active high, float 4400 mV"

@@ -1,3 +1,4 @@
-# The SMB1351 loses its configuration whenever VBUS goes away, so set it up again on every
-# charger change while plugged in. The setup is idempotent and cheap.
-SUBSYSTEM=="power_supply", KERNEL=="pm660-charger", ACTION=="change", ENV{POWER_SUPPLY_ONLINE}=="1", RUN+="/usr/bin/systemctl --no-block start vsmart-zangyapro-homeserver-smb1351-setup.service"
+# The SMB1351 loses its configuration whenever VBUS goes away, so check it on every charger
+# change while plugged in. A plug-in raises a burst of change events; the check is quick and
+# quiet, and only starts the setup unit when the chip is not configured yet.
+SUBSYSTEM=="power_supply", KERNEL=="pm660-charger", ACTION=="change", ENV{POWER_SUPPLY_ONLINE}=="1", RUN+="/usr/libexec/vsmart-zangyapro-homeserver/smb1351-setup --if-needed"
