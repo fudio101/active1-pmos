@@ -136,6 +136,6 @@ The regmap debugfs `registers` file has fixed 9-byte lines (`"%04x: %02x\n"`), s
   [`smb-reg.h`](https://github.com/LineageOS/android_kernel_xiaomi_sdm660/blob/49688d8750f2fca28271f936cfcfec5d97c0d7a4/drivers/power/supply/qcom/smb-reg.h)
   and [`smb-lib.c`](https://github.com/LineageOS/android_kernel_xiaomi_sdm660/blob/49688d8750f2fca28271f936cfcfec5d97c0d7a4/drivers/power/supply/qcom/smb-lib.c)
   (PM660 side: `smblib_stat_sw_override_cfg()`, `smblib_set_prop_input_suspend()`).
-- Kernel DT commit enabling the bus: fudio101/linux-sdm660 `23e1c7116086` (was `7e32073c1088` before sign-off)
-  (branch `fudio101/vsmart-active1-next`).
+- Kernel DT commit enabling the bus: sdm660-mainline/linux `86c693f9e1b0` on `qcom-sdm660-7.2.y`
+  (picked by minlexx 2026-10-10; our branch had it as `23e1c7116086`, `7e32073c1088` before sign-off).
 - Stopgap: `profile/vsmart-zangyapro-homeserver/smb1351-setup`, `smb1351.rules`, `charge-limit`.
