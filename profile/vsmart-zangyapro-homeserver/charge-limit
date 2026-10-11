@@ -7,10 +7,12 @@
 #
 # Above STOP + DRAIN_MARGIN (e.g. right after a full charge) it drains down to STOP with
 # force-discharge instead of waiting for an unplug. force-discharge suspends the PM660 input,
-# and the board's SMB1351 parallel charger then charges toward 4.50 V unless smb1351-setup has
-# configured it. So it only drains while `smb1351-setup --check` passes, re-checks every
-# DRAIN_INTERVAL seconds, and falls back to inhibit-charge as soon as the check fails (for
-# example after a replug, which resets the SMB1351). DRAIN_MARGIN=0 disables draining.
+# and the board's SMB1351 parallel charger then charges toward 4.50 V unless it is configured:
+# by the qcom-smb1351 kernel driver while that is bound, otherwise by smb1351-setup. So it only
+# drains while `smb1351-setup --check` passes (with the driver bound: while the driver reports
+# the SMB1351 "Not charging", which needs VBUS), re-checks every DRAIN_INTERVAL seconds, and
+# falls back to inhibit-charge as soon as the check fails (for example after a replug, which
+# resets the SMB1351). DRAIN_MARGIN=0 disables draining.
 STOP="${CHARGE_STOP:-80}"
 START="${CHARGE_START:-70}"
 INTERVAL="${CHARGE_INTERVAL:-60}"
@@ -65,7 +67,8 @@ while :; do
 		continue
 	elif [ "$cap" -ge "$STOP" ]; then
 		# Would drain but cannot: get the SMB1351 configured (it may have lost its setup with
-		# no charger event to redo it), so the next round can drain.
+		# no charger event to redo it), so the next round can drain. A no-op while the kernel
+		# driver owns the chip.
 		[ "$cap" -ge $((STOP + DRAIN_MARGIN)) ] && [ "$DRAIN_MARGIN" -gt 0 ] &&
 			"$SMB1351" --if-needed
 		[ "$mode" != inhibit-charge ] && set_mode inhibit-charge "$cap% >= $STOP%"

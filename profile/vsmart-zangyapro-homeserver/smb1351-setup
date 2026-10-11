@@ -1,9 +1,9 @@
 #!/bin/sh
 # Configure the board's SMB1351 parallel charger (I2C 0x1d on blsp_i2c2) the way stock Android
-# does, until a kernel driver does it. Mainline never touches the chip, so it runs on its OTP
-# defaults: enable pin active-low (and the PM660 holds that pin low, so it is always enabled)
-# and a 4.50 V float voltage on a 4.40 V battery. It then fast-charges the battery whenever the
-# PM660 suspends its USB input, which breaks charge_behaviour=force-discharge.
+# does, until a kernel driver does it. Without one, the chip runs on its OTP defaults: enable
+# pin active-low (and the PM660 holds that pin low, so it is always enabled) and a 4.50 V float
+# voltage on a 4.40 V battery. It then fast-charges the battery whenever the PM660 suspends its
+# USB input, which breaks charge_behaviour=force-discharge.
 #
 # Writes (volatile, lost when VBUS goes away, so this runs again on every plug-in):
 #   0x30 bit6      volatile config access
@@ -12,11 +12,17 @@
 # The chip only answers on I2C while VBUS is present. Needs a kernel whose DT enables
 # blsp_i2c2; without it this does nothing.
 #
+# A Stopgap until the qcom-smb1351 kernel driver ships in a packaged kernel (GitHub
+# fudio101/active1-pmos#1). While that driver is bound, it owns the chip (i2c-tools get EBUSY)
+# and keeps its charging disabled, so this stands down: the unit and --if-needed do nothing,
+# and --check passes only while the driver reports the SMB1351 "Not charging".
+#
 # Usage: smb1351-setup              configure now (the systemd unit)
 #        smb1351-setup --if-needed  udev: start the unit only if not configured yet
 #        smb1351-setup --check      exit 0 only if configured (no output)
 ADDR=0x1d
 ONLINE=/sys/class/power_supply/pm660-charger/online
+STATUS=/sys/class/power_supply/smb1351-charger/status
 
 bus=
 for d in /sys/bus/i2c/devices/i2c-*; do
@@ -24,6 +30,12 @@ for d in /sys/bus/i2c/devices/i2c-*; do
 	*/c176000.i2c/*) bus=${d##*/i2c-} ;;
 	esac
 done
+
+# driver_bound: 0 when a kernel driver is bound to the chip. A DT node without the driver
+# leaves the device unbound, and i2c-tools still work then.
+driver_bound() {
+	[ -n "$bus" ] && [ -e "/sys/bus/i2c/devices/$bus-001d/driver" ]
+}
 
 # configured: 0 when the enable pin polarity and float voltage are already set.
 configured() {
@@ -33,16 +45,29 @@ configured() {
 }
 
 # --check: exit 0 only if the chip is reachable and configured (used by charge-limit before it
-# relies on force-discharge). Silent.
+# relies on force-discharge). With the kernel driver bound: only if the driver reports
+# "Not charging" (online, and a live read shows the chip still configured and not charging; a
+# chip it finds reset reads "Unknown" until the driver has configured it again). Anything else
+# fails closed, "Discharging" too: the driver reports that from a cached offline flag, which
+# can be stale (a missed plug event, a failed read) while the chip charges on OTP defaults.
+# Silent.
 if [ "$1" = "--check" ]; then
+	if driver_bound; then
+		case "$(cat "$STATUS" 2>/dev/null)" in
+		"Not charging") exit 0 ;;
+		esac
+		exit 1
+	fi
 	[ -n "$bus" ] && configured
 	exit
 fi
 
 # --if-needed: called by udev on every charger change (a plug-in raises a burst of them) and by
-# charge-limit when it wants to drain. Quiet and quick; it only starts the setup unit when the
-# bus exists, the charger is online and the chip is not configured yet.
+# charge-limit when it wants to drain. Quiet and quick; it only starts the setup unit when no
+# kernel driver owns the chip, the bus exists, the charger is online and the chip is not
+# configured yet.
 if [ "$1" = "--if-needed" ]; then
+	driver_bound && exit 0
 	[ -n "$bus" ] && [ "$(cat "$ONLINE" 2>/dev/null)" = 1 ] || exit 0
 	configured && exit 0
 	exec systemctl --no-block start vsmart-zangyapro-homeserver-smb1351-setup.service
@@ -50,6 +75,11 @@ fi
 
 if [ -z "$bus" ]; then
 	echo "smb1351-setup: blsp_i2c2 (c176000.i2c) not enabled in this kernel, nothing to do"
+	exit 0
+fi
+
+if driver_bound; then
+	echo "smb1351-setup: the qcom-smb1351 kernel driver owns the SMB1351, nothing to do"
 	exit 0
 fi
 
@@ -63,9 +93,14 @@ if configured; then
 	exit 0
 fi
 
-# Right after a plug-in the chip may not answer yet.
+# Right after a plug-in the chip may not answer yet. If the kernel driver binds meanwhile,
+# i2c-tools get EBUSY: stop at once instead of retrying.
 i=0
 until i2cget -y "$bus" $ADDR 0x06 >/dev/null 2>&1; do
+	if driver_bound; then
+		echo "smb1351-setup: the qcom-smb1351 kernel driver took over the SMB1351, nothing to do"
+		exit 0
+	fi
 	i=$((i + 1))
 	if [ $i -ge 10 ]; then
 		echo "smb1351-setup: no answer from SMB1351 at $ADDR on i2c-$bus"
