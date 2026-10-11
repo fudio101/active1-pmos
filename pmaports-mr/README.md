@@ -1,5 +1,10 @@
 # pmaports MR staging — Vsmart Active 1
 
+> **Historical.** This plan (and `MR-description.md`) is for MR !9713, closed on 2026-10-09 because
+> Nura does not accept AI-generated contributions. The live MR is
+> [!9720](https://gitlab.postmarketos.org/postmarketOS/pmaports/-/merge_requests/9720), which the user wrote by hand
+> (fork branch `zangyapro`, 2 commits). `../pmaports/device/testing/` mirrors its packages.
+
 Step 2 of upstreaming (see [`../README.md`](../README.md#upstreaming--publishing)). pmaports
 lives on **GitLab**, so this is a `glab` / GitLab merge request, not a `gh` PR. The target branch
 is **`main`**.
@@ -55,8 +60,8 @@ Packages: `device/testing/device-vsmart-zangyapro/` + `device/testing/firmware-v
 - `firmware-vsmart-zangyapro` ships:
   - `board-2.bin` (WCN3990 RF-calibration, 480 KB, 25-entry vendor table) — **not committed in
     pmaports**. Self-hosted in `vendor-blobs/` at repo root (outside MR scope); the APKBUILD
-    fetches it from a **commit-pinned** raw GitHub URL via `_board_commit`, mirroring how
-    `_zap_commit` pins the TheMuppets blob. Cannot use linux-firmware's copy — that file is for
+    fetches it from a **commit-pinned** raw GitHub URL via `_blobs_rev`, mirroring how
+    `_muppets_rev` pins the TheMuppets blob. Cannot use linux-firmware's copy — that file is for
     sdm845 and causes an MSS watchdog crash on SDM660 (pmaports #3803). See
     `vendor-blobs/README.md`.
   - `a512_zap.mbn` (Adreno 512 GPU zap shader) — TheMuppets

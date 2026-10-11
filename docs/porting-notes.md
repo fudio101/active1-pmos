@@ -17,8 +17,8 @@ for the open items.
 - **Firmware:** `firmware-vsmart-zangyapro` (hard dep of `device-vsmart-zangyapro`) provides:
   `board-2.bin` (WCN3990 RF-calibration, self-hosted in `vendor-blobs/` — linux-firmware's copy
   crashes SDM660, pmaports #3803), `a512_zap.mbn` (Adreno 512 zap, TheMuppets fetch),
-  `firmware-5.bin` (generated at build by `ath10k-fwencoder`), `wlanmdsp.mbn` (from
-  `linux-firmware-ath10k` dep). Adreno a530 microcode from `firmware-qcom-adreno-a530`.
+  `firmware-5.bin` (generated at build by `ath10k-fwencoder`). `wlanmdsp.mbn` comes from the
+  phone's own modem partition via `msm-firmware-loader`, so `linux-firmware-ath10k` is not needed. Adreno a530 microcode from `firmware-qcom-adreno-a530`.
   Full provenance: `vendor-blobs/README.md`.
 
 ## Tips
