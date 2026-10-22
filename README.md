@@ -84,24 +84,17 @@ The port is three upstream contributions, in order:
    `dtbs_check` clean on 7.0.y (the one dts `checkpatch` warning is the usual MAINTAINERS
    false-positive; `Assisted-by` tag clean under 7.0.y's checkpatch). Shipped in release tag
    **`v7.0.14-sdm660`** (cut 2026-08-02).
-2. **pmaports** — staged under [`pmaports-mr/`](pmaports-mr). **Unblocked.** The kernel package
-   maintainer bumped pmaports to 7.0.14 himself in
-   [!9224](https://gitlab.postmarketos.org/postmarketOS/pmaports/-/merge_requests/9224) (commit
-   `263089a0`, 2026-08-06), citing this device — so the dtb and the HX83112A driver already ship
-   in the packaged kernel. Two commits remain:
-   - `device/testing/linux-postmarketos-qcom-sdm660`: enable
-     `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` and bump `pkgrel`. **Do not touch `pkgver`** — 7.0.14
-     is already upstream.
-   - `device/testing/{device,firmware}-vsmart-zangyapro/` — device + firmware packages, one
-     commit (pmaports `COMMITSTYLE.md` requires device-specific firmware in the same commit as
-     the device). `board-2.bin` (WCN3990 RF-calibration) is self-hosted in `vendor-blobs/`
-     (excluded from the MR) and fetched via a **commit-pinned** raw GitHub URL; `a512_zap.mbn`
-     (Adreno 512 zap) fetched from TheMuppets; `firmware-5.bin` (WCN3990 feature descriptor)
-     generated at build by `ath10k-fwencoder` — not a blob.
-
-   Copy these into a [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout
-   and open a merge request against **`main`**, following its `COMMITSTYLE.md` (GitLab — needs
-   `glab`/GitLab auth, not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for exact steps.
+2. **pmaports** — **merged 2026-10-21** as
+   [!9720](https://gitlab.postmarketos.org/postmarketOS/pmaports/-/merge_requests/9720)
+   (commits `400b925dec7c` kernel, `ab4fa0908df9` device; the first attempt, !9713, was closed).
+   The kernel maintainer had already bumped pmaports to 7.0.14 in
+   [!9224](https://gitlab.postmarketos.org/postmarketOS/pmaports/-/merge_requests/9224), so the MR
+   only enabled `CONFIG_DRM_PANEL_HIMAX_HX83112A=m` (kernel `7.0.14-r2`) and added
+   `device-vsmart-zangyapro` and `firmware-vsmart-zangyapro` (both `1-r0`, device/testing).
+   `board-2.bin` is self-hosted in `vendor-blobs/` and fetched via a commit-pinned raw GitHub URL;
+   `a512_zap.mbn` comes from TheMuppets; `firmware-5.bin` is generated at build by
+   `ath10k-fwencoder`. The old staging notes (`pmaports-mr/`) are in git history before this
+   commit.
 3. **Wiki** — published at **[wiki.nura.eco/wiki/Vsmart_Active_1_(vsmart-zangyapro)](https://wiki.nura.eco/wiki/Vsmart_Active_1_(vsmart-zangyapro))**. Source kept at [`wiki/Vsmart_Active_1.wiki`](wiki/Vsmart_Active_1.wiki).
 
 ### After the pmaports MR merges — cleanup checklist
@@ -109,7 +102,7 @@ The port is three upstream contributions, in order:
 Review will take weeks, so this is written down rather than remembered. Once the MR is merged
 upstream, the staging copies in this repo stop being the source of truth and start rotting:
 
-- [ ] Delete `pmaports-mr/` — MR staging notes, no purpose once merged.
+- [x] Delete `pmaports-mr/` — done 2026-10-22.
 - [ ] Decide on `pmaports/` — the device and firmware packages now live upstream. Keeping the
       mirror here means it silently diverges from pmaports; either delete it or add a note saying
       upstream wins. Note `dev.sh sync` copies from this directory, so deleting it changes the
