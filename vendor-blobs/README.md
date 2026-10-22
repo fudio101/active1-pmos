@@ -3,8 +3,8 @@
 Holds proprietary firmware blobs used by the Vsmart Active 1 (zangyapro) that have no usable
 public mirror (absent from linux-firmware, or present there but incompatible).
 
-This directory lives at **repo root** (not under `pmaports/`) so it is automatically excluded from
-the upstream pmaports MR while its GitHub raw URLs remain publicly fetchable by the APKBUILD.
+The pmaports `firmware-vsmart-zangyapro` APKBUILD fetches these files from their GitHub raw URLs,
+so this directory must stay public.
 
 > **The APKBUILD pins the raw URL to a commit SHA, never a branch**, so the source is immutable.
 > When you replace a blob here, point the APKBUILD's pinned revision at the commit that added it

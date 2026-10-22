@@ -14,12 +14,14 @@ sudo apk upgrade                   # upgrade to newer versions  <-- USE THIS ONE
 ```
 
 > **WARNING — do NOT run `apk upgrade -a` / `--available` / `--prune` on this device.**
-> The general pmOS advice is to use `-a`, but our **kernel, `device-vsmart-zangyapro` and
-> `firmware-vsmart-zangyapro` are local builds not in any public repo**, so `-a` would
-> *downgrade* the kernel (losing the DTS → broken boot) and `--prune` would *remove* the
-> device/firmware packages (losing WiFi + GPU). Plain `sudo apk upgrade` is safe. The three
-> packages are pinned in `/etc/apk/world` as a safety net. (Resolved once the port is upstreamed
-> to pmaports.)
+> `device-vsmart-zangyapro` and `firmware-vsmart-zangyapro` are in Nura edge since MR !9720
+> (2026-10-21), but the **running kernel is a local test build** (`7.0.14_p…`, really 7.2.3 with
+> touch, the SMB1351 driver and the idle-state fix). It is versioned above the repo's `7.0.14-r2`,
+> so `-a` would *downgrade* it to the packaged kernel and lose those features. The **server
+> profile** (`vsmart-zangyapro-homeserver`) is local only, so `--prune` would *remove* it.
+> Plain `sudo apk upgrade` is safe: the local kernel, device, firmware and profile packages are
+> pinned by checksum (`><Q1…`) in `/etc/apk/world`. A restore strips those pins; without them a
+> plain upgrade replaces the kernel as soon as the repo has a higher version.
 
 ```sh
 cat /etc/apk/world                 # explicitly-installed packages (edit + `apk fix` to apply)

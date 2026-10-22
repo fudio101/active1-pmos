@@ -4,10 +4,11 @@
 #
 #   ./dev.sh <command>     # run without args to list commands
 #
-# Repo layout mirrors upstream so files can be contributed directly:
-#   pmaports/device/testing/device-vsmart-zangyapro/   -> copy into pmaports MR
+# The device and firmware packages live in pmaports (device/testing, MR !9720); the build
+# uses whatever your pmaports checkout has. This repo only adds:
 #   kernel/sdm660-vsmart-zangyapro.dts (+ .patch)       -> kernel contribution
-#   wiki/Vsmart_Active_1.wiki                           -> postmarketOS wiki page (live: wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro))
+#   profile/vsmart-zangyapro-homeserver/                -> local server profile (never upstream)
+#   wiki/Vsmart_Active_1.wiki                           -> Nura wiki page (live: wiki.nura.eco/wiki/Vsmart_Active_1_(vsmart-zangyapro))
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -34,7 +35,6 @@ EXPORT_DIR="${EXPORT_DIR:-/tmp/pmos-export}"
 FASTBOOT="${FASTBOOT:-fastboot}"                 # WSL: set FASTBOOT=/mnt/c/adb/fastboot.exe
 
 DTS_SRC="$HERE/kernel/$DTS"
-DEVPKG_SRC="$HERE/pmaports/device/testing/device-$DEVICE"
 # Server profile: headless home-server policy, local only (never in the upstream MR).
 PROFILE_PKG="$DEVICE-homeserver"
 PROFILE_SRC="$HERE/profile/$PROFILE_PKG"
@@ -50,7 +50,7 @@ cmd_setup(){   # first run on a fresh Linux/macOS machine
   say "now run: (cd $PMB && ./pmbootstrap.py init)  then  ./dev.sh sync"
 }
 
-cmd_sync(){    # push dts + device package into the live build trees
+cmd_sync(){    # push dts + server profile into the live build trees
   say "sync dts -> kernel source"
   cp -v "$DTS_SRC" "$KSRC/arch/arm64/boot/dts/qcom/$DTS"
   local MK="$KSRC/arch/arm64/boot/dts/qcom/Makefile"
@@ -59,16 +59,10 @@ cmd_sync(){    # push dts + device package into the live build trees
   local TAB; TAB=$(printf '\t')
   grep -q "${DTS%.dts}.dtb" "$MK" || \
     sed -i "0,/sdm660-xiaomi-.*\.dtb/s/^.*sdm660-xiaomi-.*\.dtb.*\$/dtb-\$(CONFIG_ARCH_QCOM)${TAB}+= ${DTS%.dts}.dtb\n&/" "$MK"
-  say "sync device package -> pmaports"
+  # device-/firmware-$DEVICE come from the pmaports checkout itself (upstream since !9720)
   local APORTS; APORTS="$(pmb config aports | tr -d '[:space:]')"
-  local D="$APORTS/device/testing/device-$DEVICE"; mkdir -p "$D"
-  cp -v "$DEVPKG_SRC"/* "$D/"
-  pmb checksum "device-$DEVICE"
-  say "sync firmware package -> pmaports"
-  local FW_SRC="$HERE/pmaports/device/testing/firmware-$DEVICE"
-  local FW="$APORTS/device/testing/firmware-$DEVICE"; mkdir -p "$FW"
-  cp -v "$FW_SRC"/* "$FW/"
-  pmb checksum "firmware-$DEVICE"
+  [ -d "$APORTS/device/testing/device-$DEVICE" ] || \
+    { echo "device-$DEVICE missing in $APORTS: update the checkout (pmbootstrap pull)" >&2; exit 1; }
   say "sync server profile package -> pmaports (local only, git-excluded there)"
   local PR="$APORTS/device/testing/$PROFILE_PKG"; mkdir -p "$PR"
   cp -v "$PROFILE_SRC"/* "$PR/"
@@ -132,7 +126,7 @@ case "${1:-help}" in
   *) cat <<EOF
 active1-pmos/dev.sh  (Linux/macOS)
   setup       first-time: install deps + clone pmbootstrap/kernel
-  sync        copy dts + device package into kernel/pmaports trees + checksum
+  sync        copy dts into the kernel tree, server profile into pmaports + checksum
   patch       regenerate kernel/*.patch (git format-patch) for upstreaming
   build       build kernel (pmbootstrap build --src \$KSRC)
   install     build rootfs + boot image (pass=$PASS)

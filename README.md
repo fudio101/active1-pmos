@@ -26,10 +26,7 @@ earlier hangs were a low-power brownout). Known issue: the touchscreen is parked
 
 ```
 dev.sh                                              # build/flash/ssh helper
-pmaports/device/testing/device-vsmart-zangyapro/   # device package -> copy into pmaports
-  APKBUILD  deviceinfo  modules-initfs
-pmaports/device/testing/firmware-vsmart-zangyapro/
-  APKBUILD                                          # firmware pkg (board-2.bin fetched from vendor-blobs/)
+profile/vsmart-zangyapro-homeserver/                # local server profile package (never upstream)
 vendor-blobs/                                       # proprietary blobs with no public mirror
   board-2.bin                                       # WCN3990 RF-calibration (self-hosted, see README inside)
   README.md                                         # provenance + update instructions for all blobs
@@ -103,15 +100,14 @@ Review will take weeks, so this is written down rather than remembered. Once the
 upstream, the staging copies in this repo stop being the source of truth and start rotting:
 
 - [x] Delete `pmaports-mr/` — done 2026-10-22.
-- [ ] Decide on `pmaports/` — the device and firmware packages now live upstream. Keeping the
-      mirror here means it silently diverges from pmaports; either delete it or add a note saying
-      upstream wins. Note `dev.sh sync` copies from this directory, so deleting it changes the
-      local build flow.
+- [x] Decide on `pmaports/` — deleted 2026-10-22: it was byte-identical to pmaports main, and
+      upstream is the source of truth. `dev.sh sync` no longer copies the device/firmware
+      packages; they come from the pmaports checkout.
 - [x] `wiki/Vsmart_Active_1.wiki`: done 2026-10-22, live rev 110078 (full rewrite: `packaged = yes`,
       package fields, status for the packaged 7.0.14 kernel); local copy synced.
-- [ ] `docs/cheatsheet.md`: drop "*(Resolved once the port is upstreamed to pmaports.)*" from the
+- [x] `docs/cheatsheet.md`: drop "*(Resolved once the port is upstreamed to pmaports.)*" from the
       `apk upgrade -a` warning and rewrite what the warning now means.
-- [ ] `docs/porting-notes.md` "Protecting the local packages from apk": "absent from any public
+- [x] `docs/porting-notes.md` "Protecting the local packages from apk": "absent from any public
       repo" and "or upstreaming to pmaports" both become false.
 - [ ] Drop the three pinned packages from `/etc/apk/world` on the device and switch to the
       upstream ones. **Do this deliberately, on a charger, with a backup** — it replaces the

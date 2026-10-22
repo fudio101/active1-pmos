@@ -149,18 +149,24 @@ laptop/weak USB port.
   effect. After a flat discharge the % sticks/jumps until a full charge cycle recalibrates it.
 
 ## Protecting the local packages from apk
-device/firmware/kernel are local builds, absent from any public repo, so
-`apk upgrade -a|--available|--prune` will downgrade/remove them (it tried to downgrade the kernel
-to the repo version that lacks this DTS). Mitigations applied on the device:
+Since MR !9720 (merged 2026-10-21) `device-vsmart-zangyapro` and `firmware-vsmart-zangyapro` are in
+Nura edge, at the same version (`1-r0`) as the local builds on the device. Two local packages are
+still absent from every public repo: the kernel (a 7.2.3 test build versioned
+`7.0.14_p20261010233946-r1`, above the repo's `7.0.14-r2`) and the server profile. So
+`apk upgrade -a|--available` would downgrade the kernel to the packaged one (no touch, no SMB1351
+driver, no idle-state fix), and `--prune` would remove the profile. Mitigations on the device:
 - Operating rule: only ever run plain `apk upgrade` (never -a / --available / --prune).
-- **Plain `apk upgrade` still replaces the kernel whenever the repo has a higher version.**
-  Seen 2026-10-09: the local build was versioned `6.19.10_p20260620124623-r0` (it actually ran
-  7.0.9), so the upgrade swapped in pmaports' `7.0.14-r0`, which lacks the HX83112A panel driver.
-  Because of `flash_kernel_on_update`, it was also written to `boot_a` straight away. Fix: right
-  after the upgrade and **before rebooting**, `apk add --allow-untrusted` the local build again
-  (its version must be higher than the repo's, e.g. `7.0.14-r1`). Also, `/etc/apk/world` only
-  lists `device-vsmart-zangyapro`; the kernel and firmware come in as dependencies, not pinned.
+- **Plain `apk upgrade` still replaces the kernel whenever the repo has a higher version**, unless
+  it is pinned. Seen 2026-10-09: the local build was versioned `6.19.10_p20260620124623-r0` (it
+  actually ran 7.0.9), so the upgrade swapped in pmaports' `7.0.14-r0`, which lacked the HX83112A
+  panel driver. Because of `flash_kernel_on_update`, it was also written to `boot_a` straight away.
+  Fix: right after the upgrade and **before rebooting**, `apk add --allow-untrusted` the local
+  build again (its version must be higher than the repo's).
+- The kernel, device, firmware and profile packages are pinned by checksum (`><Q1…`) in
+  `/etc/apk/world`, from installing the local apks (seen 2026-10-13 and 2026-10-22). A restore
+  (`restore_configs.sh`) strips those pins.
 - An upgrade that includes openssh can leave the running sshd resetting every new connection
   (`kex_exchange_identification: Connection reset by peer`). Keep the session that ran `apk`
   open, and run `sudo systemctl restart sshd` when it finishes.
-- Full immunity would need a signed local repo on the device, or upstreaming to pmaports.
+- The kernel stays local until the pending upstream work (sdm660-mainline #240, #241) reaches a
+  packaged kernel; the device and firmware packages can follow upstream.
