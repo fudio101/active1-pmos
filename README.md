@@ -102,7 +102,7 @@ The port is three upstream contributions, in order:
    Copy these into a [pmaports](https://gitlab.postmarketos.org/postmarketOS/pmaports) checkout
    and open a merge request against **`main`**, following its `COMMITSTYLE.md` (GitLab — needs
    `glab`/GitLab auth, not `gh`). See [`pmaports-mr/README.md`](pmaports-mr) for exact steps.
-3. **Wiki** — published at **[wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro)](https://wiki.postmarketos.org/wiki/Vsmart_Active_1_(vsmart-zangyapro))**. Source kept at [`wiki/Vsmart_Active_1.wiki`](wiki/Vsmart_Active_1.wiki).
+3. **Wiki** — published at **[wiki.nura.eco/wiki/Vsmart_Active_1_(vsmart-zangyapro)](https://wiki.nura.eco/wiki/Vsmart_Active_1_(vsmart-zangyapro))**. Source kept at [`wiki/Vsmart_Active_1.wiki`](wiki/Vsmart_Active_1.wiki).
 
 ### After the pmaports MR merges — cleanup checklist
 
@@ -114,9 +114,8 @@ upstream, the staging copies in this repo stop being the source of truth and sta
       mirror here means it silently diverges from pmaports; either delete it or add a note saying
       upstream wins. Note `dev.sh sync` copies from this directory, so deleting it changes the
       local build flow.
-- [ ] `wiki/Vsmart_Active_1.wiki`: set `packaged = yes` (L14), uncomment `devicepackage` (L36) and
-      `kernelpackage` (L37). Then apply the same edits to the live wiki page. (`initial_MR` was
-      already set to `{{MR|9713|pmaports}}` on 2026-10-09, live and local.)
+- [x] `wiki/Vsmart_Active_1.wiki`: done 2026-10-22, live rev 110078 (full rewrite: `packaged = yes`,
+      package fields, status for the packaged 7.0.14 kernel); local copy synced.
 - [ ] `docs/cheatsheet.md`: drop "*(Resolved once the port is upstreamed to pmaports.)*" from the
       `apk upgrade -a` warning and rewrite what the warning now means.
 - [ ] `docs/porting-notes.md` "Protecting the local packages from apk": "absent from any public

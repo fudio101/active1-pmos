@@ -1,4 +1,3 @@
-{{DISPLAYTITLE:Vsmart Active 1 (vsmart-zangyapro)}}
 {{Infobox device
 
 <!-- Main -->
@@ -11,41 +10,39 @@
 | releaseyear  = 2018
 
 | booting  = yes
-| packaged = no
-| category = testing
+| packaged = yes
+| category = testing <!-- keep explicit until Template:Get device category lists device-vsmart-zangyapro -->
 
 <!-- Hardware -->
 | chipset = Qualcomm Snapdragon 660 (SDM660)
-| cpu     = 4x 2.2 GHz Kryo 260 Gold, 4x 1.8 GHz Kryo 260 Silver
+| cpu     = 4x 2.2 GHz Kryo 260 Gold, 4x 1.84 GHz Kryo 260 Silver
 | gpu     = Adreno 512
-| display = 1080 x 2160 LCD, Himax HX83112A (DJN)
+| display = 1080 x 2160 IPS LCD, 18:9, 5.65", Himax HX83112A (DJN)
 | storage = 64 GB
 | memory  = 4 GB
 | architecture = aarch64
-| wp_type =
 
 <!-- Software -->
 | originalsoftware = Android
-| originalversion  = 9
+| originalversion  = 8.1
+| extendedversion  = 9
 | status_fossbootloader = N
 
 <!-- Nura -->
-| type          = handset
-| pmoskernel    = Mainline 7.0.x
-| whet_dhry     = 0.0
-| devicepackage   = <!-- {{Device package|vsmart-zangyapro|testing}} once packaged -->
-| kernelpackage   = <!-- {{Kernel package|linux-postmarketos-qcom-sdm660}} once packaged -->
-| firmwarepackage = {{Firmware package|vsmart-zangyapro|testing}}
-
-| supported      = yes
-| prebuiltimages = no
-| initial_MR   = {{MR|9713|pmaports}}
+| type            = handset
+| pmoskernel      =
+| devicepackage   = {{pmaport|device-vsmart-zangyapro}} <!-- leave empty once Template:Get device category lists it -->
+| kernelpackage   =
+| firmwarepackage = {{pmaport|firmware-vsmart-zangyapro}} <!-- {{Firmware package|vsmart-zangyapro}} once listed -->
+| supported       = yes
+| prebuiltimages  = no
+| initial_MR      = {{MR|9720|pmaports}}
 
 <!-- Features: Main -->
 | status_flashing = Y
 | status_usbnet   = Y
 | status_emmc     = Y
-| status_sdcard   = <!-- enabled in DT, no card on hand to test at runtime -->
+| status_sdcard   = <!-- controller probes, no card tested yet -->
 | status_battery  = P
 | status_screen   = Y
 | status_touch    = N
@@ -55,179 +52,184 @@
 
 <!-- Features: Multimedia -->
 | status_3d     = Y
-| status_audio  =
-| status_camera =
-| status_cameraflash = -
+| status_dvb    = -
+| status_audio  = N
+| status_camera = N
+| status_cameraflash = N
 | status_irtx   = -
 | status_irrx   = -
 
 <!-- Features: Connectivity -->
 | status_wifi      = Y
 | status_bluetooth = Y
-| status_gps   =
-| status_nfc   =
+| status_ethernet  = -
+| status_gps       = N
+| status_nfc       = -
 
 <!-- Features: Modem -->
-| status_calls =
-| status_sms   =
-| status_mobiledata =
+| status_calls      =
+| status_sms        =
+| status_mobiledata = N
 
 <!-- Features: Misc -->
-| status_ethernet = -
-| status_usba = -
-| status_sata = -
-| status_otg  =
+| status_fde    =
+| status_usba   = -
+| status_sata   = -
+| status_otg    = N
 | status_hdmidp = -
-| status_fde  =
-| status_fingerprint =
+| status_fingerprint = N
 
 <!-- Features: Sensors -->
-| status_accel     =
-| status_magnet    =
-| status_light     =
-| status_proximity =
-| status_hall      = -
-| status_haptics   =
-| status_barometer = -
-| status_powersensor =
-}}{{Based on SoC|Qualcomm_Snapdragon_660_(SDM660)|Snapdragon 660}}
+| status_accel       =
+| status_magnet      =
+| status_light       = N
+| status_proximity   =
+| status_hall        = N
+| status_haptics     =
+| status_barometer   = -
+| status_powersensor = -
+}}{{Based on SoC|Qualcomm Snapdragon 660/630/636 (SDM660/SDM630/SDM636)|Snapdragon 660}}
 
-The '''Vsmart Active 1''' (codename '''vsmart-zangyapro''') is a 2018 Snapdragon 660 handset. It is a
-rebrand of the '''BQ Aquaris X2 Pro''' and very close to the '''[[Xiaomi Mi A2 (xiaomi-jasmine_sprout)]]''';
-this port is derived from the latter and shares its mainline kernel. It is used here as a small
-'''headless home server'''.
+The '''Vsmart Active 1''' (PQ6001) is a Snapdragon 660 smartphone released by Vsmart in 2018. It is based on BQ's Aquaris X2 Pro design (codename ''zangyapro'').
 
-{{Note|1=The Vsmart bootloader enforces dm-android-verity and injects <code>skip_initramfs</code> /
-<code>dm=...android-verity...</code> into the kernel command line, which blocks Android GSIs. The mainline
-kernel ignores these parameters (they are passed to userspace), so Nura boots without any verity
-workaround. '''lk2nd is not required.'''}}
+The port uses the close-to-mainline SDM660 kernel from [https://github.com/sdm660-mainline/linux sdm660-mainline], shared with the other SDM660 devices. Its device tree is derived from the [[Xiaomi Mi A2 (xiaomi-jasmine_sprout)|Xiaomi Mi A2]]'s.
 
 == Contributors ==
 * [[User:Fudio101|Fudio101]]
 
+== Maintainers ==
+* [[User:Fudio101|Fudio101]] (<code>device-vsmart-zangyapro</code>, <code>firmware-vsmart-zangyapro</code>)
+
 == Users owning this device ==
 {{Device owners}}
 
-== Unlocking the bootloader ==
-{{Erase data warning}}
-# Enable '''OEM unlocking''' and USB debugging in Android developer options.
-# Reboot to fastboot ({{button|Volume Down}} + {{button|Power}}) and run:
-#: <syntaxhighlight lang="shell-session">
-fastboot flashing unlock
-fastboot flashing unlock_critical
-</syntaxhighlight>
-<code>fastboot oem unlock</code> is not supported on this bootloader.
-
 == How to enter flash mode ==
-Hold {{button|Volume Down}} + {{button|Power}} to boot into fastboot mode.
+With the device powered off, hold {{ButtonCombo|Volume Down|Power}} until the fastboot screen appears. From a running Nura system with systemd, <code>sudo systemctl reboot --reboot-argument=bootloader</code> also works.
 
 == Installation ==
-Follow the [[Installation guide]]. The mainline kernel sidesteps the OEM verity, so a plain boot image works:
+=== Unlocking the bootloader ===
+{{Erase data warning}}
+# In Android, enable '''OEM unlocking''' in the developer options.
+# Enter flash mode and unlock the bootloader, then confirm with the volume and power keys on the device:
+#: <syntaxhighlight lang="shell-session">
+$ fastboot flashing unlock
+</syntaxhighlight>
+<code>fastboot oem unlock</code> is not supported by this bootloader.
+
+=== Using pmbootstrap ===
+The device is only packaged in the '''edge''' channel; it is not available in v26.06. There are no pre-built images. The packages in edge have not been tested from a fresh installation yet; the statuses on this page come from locally built packages made from the same sources.
+
+Follow [[Installation/Using pmbootstrap]] and choose the edge channel. When asked for the device's vendor/codename, select '''vsmart''' as the vendor and '''zangyapro''' as the codename. Build the installation with <code>pmbootstrap install</code>, then enter flash mode and flash the boot image and the root filesystem:
 
 <syntaxhighlight lang="shell-session">
-pmbootstrap init        # vendor: vsmart, device: zangyapro
-pmbootstrap install
-pmbootstrap flasher flash_kernel     # -> boot partition
-pmbootstrap flasher flash_rootfs     # -> userdata
-fastboot reboot
+$ pmbootstrap flasher flash_kernel
+$ pmbootstrap flasher flash_rootfs
+$ fastboot reboot
 </syntaxhighlight>
 
-To test without flashing: <code>pmbootstrap flasher boot</code> (or <code>fastboot boot boot.img</code>).
+<code>flash_kernel</code> writes to the <code>boot</code> partition of the active slot (see [[#A/B slots|A/B slots]]). <code>pmbootstrap flasher flash_vbmeta</code> is available but not required. To try a boot image without flashing it, use <code>pmbootstrap flasher boot</code>. After the first boot, the device is reachable over [[USB Network|USB networking]] at <code>172.16.42.1</code>.
 
-{{Note|'''Flashing the rootfs over a 32-bit <code>fastboot.exe</code> (Windows):''' large
-<code>fastboot flash userdata</code> transfers fail on this stack ("Invalid sparse file format" /
-"Write to device failed"). Split the raw image into ~20 MB sparse chunks (<code>img2simg</code> +
-<code>simg2simg ... 20000000</code>) and flash them sequentially; a USB-2.0 hub improves stability.}}
+=== Backing up device data ===
+The installation only overwrites <code>boot</code> of the active slot and <code>userdata</code>. Right after the first boot, before flashing anything else, copy these partitions off the device:
+* <code>modemst1</code>, <code>modemst2</code>, <code>fsg</code>, <code>fsc</code> and <code>persist</code> - device-specific modem and calibration data.
+* <code>boot</code> of the inactive slot - the stock Android kernel (<code>boot_b</code> if <code>/proc/cmdline</code> contains <code>androidboot.slot_suffix=_a</code>).
 
-== Running as a headless server ==
-* '''Power draw''' (idle: WiFi + Bluetooth + console) is about '''2.4 W'''; under heavy CPU load ~4-5 W.
-* The 3100 mAh battery (manufacturer rating; the device tree uses a 3000 mAh design value for the fuel
-  gauge) acts as a '''built-in UPS''': at idle it lasts roughly '''~4.5 h from 100%''' (~3.5 h from 80%)
-  on battery alone. Figures are indicative — computed from the 3000 mAh design figure on a used unit with a
-  degraded battery.
-* '''<code>qbootctl</code>''' (hard dependency) marks the active A/B slot "successful" at every boot.
-  Without it the bootloader counts down the slot retry counter and eventually drops to fastboot.
-* Connect over USB (<code>ssh user@172.16.42.1</code>) or WiFi. Bluetooth auto-starts at boot.
+For example: <code>sudo dd if=/dev/disk/by-partlabel/modemst1 of=modemst1.img</code>. Vsmart no longer makes phones, and stock firmware images are hard to find. Returning to Android has not been tested.
 
-{{Warning|Charging needs a real &ge;2 A wall charger. BC1.2 detection works: a weak/laptop (SDP) port is
-capped at ~450 mA, less than the running load, so the battery slowly drains even while "Charging". A 2 A DCP
-charger pulls ~1.5 A and charges at ~1.1 A while running. A warm <code>reboot</code> on a low/weak battery may
-brown out and hang; keep the device on a 2 A+ charger.}}
+=== Troubleshooting ===
+The bootloader's fastboot is unreliable on many USB 3 host ports: the device is not detected, or large transfers stop with <code>Write to device failed</code>. The problem is in the bootloader, not in the host. Use a USB 2.0 port or a USB 2.0 hub.
 
-== Forcing USB Host Mode ==
-{{Note|1=Only needed if you want USB host (drive/hub/keyboard); skip for plain headless use. '''Not yet
-verified on this device''' — the Active 1 device tree currently sets <code>dr_mode = "peripheral"</code>;
-the procedure below is adapted from the Mi A2 and would also need the device tree switched off peripheral-only
-mode.}}
-This device shares the SDM660 kernel <code>linux-postmarketos-qcom-sdm660</code> with the
-[[Xiaomi Mi A2 (xiaomi-jasmine_sprout)#Forcing USB Host Mode|Xiaomi Mi A2]]: the DWC3 controller does not
-auto-switch to host mode. On the Mi A2 the shared kernel is rebuilt with '''Host only''' mode and a
-'''powered''' USB-C hub is required (the port does not supply VBUS):
+If <code>flash_rootfs</code> still fails (seen with the 32-bit <code>fastboot.exe</code> on Windows), export the images and, in the export directory, flash the root filesystem in sparse chunks of about 20 MB:
 
 <syntaxhighlight lang="shell-session">
-pmbootstrap kconfig edit linux-postmarketos-qcom-sdm660
-# Device Drivers -> USB support -> DWC3 -> DWC3 Mode Selection -> Host only
-pmbootstrap build linux-postmarketos-qcom-sdm660 --force
-pmbootstrap flasher flash_kernel
+$ pmbootstrap export
+$ img2simg vsmart-zangyapro.img rootfs.simg
+$ simg2simg rootfs.simg rootfs.chunk 20000000
+$ for f in rootfs.chunk.*; do fastboot flash userdata "$f"; done
 </syntaxhighlight>
 
-== Hardware ==
+== Safety ==
+{{Warning|Use a wall charger that provides at least 2 A. On a computer USB port the charger limits its input to 500 mA, which is less than the running load, so the battery drains even while it reports "Charging". A reboot on a low battery with a weak supply can brown out and hang the device.}}
+The packaged kernel does not manage the SMB1351 parallel charger, so it runs with its factory settings and a float voltage of 4.50 V, above the 4.40 V rating of the battery. It stays idle while the PM660 charger draws power. Do not write <code>0</code> to <code>/sys/class/power_supply/pm660-charger/status</code> (for example to stop charging) while a charger is connected: this suspends the PM660 input, and the SMB1351 then charges the battery towards 4.50 V.
+
+== Firmware ==
+The device uses <code>msm-firmware-loader</code>: the modem, ADSP, CDSP, Venus, Wi-Fi and Bluetooth firmware is loaded at boot from the stock partitions of the active slot (<code>modem</code>, <code>dsp</code>, <code>bluetooth</code>, <code>vendor</code>) and from <code>persist</code>. These partitions must not be erased or overwritten.
+
+<code>firmware-vsmart-zangyapro</code> adds what the partitions do not provide in a form the mainline drivers can use:
+* <code>ath10k/WCN3990/hw1.0/board-2.bin</code> - the Wi-Fi board data files of this device in the container format ath10k expects (the modem partition only has them as separate <code>bdwlan.*</code> files). The <code>board-2.bin</code> from linux-firmware is not used.
+* <code>ath10k/WCN3990/hw1.0/firmware-5.bin</code> - a firmware feature descriptor generated with <code>ath10k-fwencoder</code>.
+* <code>postmarketos/a512_zap.mbn</code> - Adreno 512 zap shader. It takes precedence over the copy on the <code>vendor</code> partition.
+
+== Hardware support ==
+This section describes the packaged kernel (<code>linux-postmarketos-qcom-sdm660</code> 7.0.14, built from the sdm660-mainline tag <code>v7.0.14-sdm660</code>). Changes still under review are marked "pending upstream"; fixes already merged into the newer 7.2 branch of sdm660-mainline, but not packaged yet, are marked as such.
+* '''Display''' - works. It uses the <code>panel-himax-hx83112a</code> driver, originally written for the Fairphone 4, with a <code>djn,a1-hx83112a</code> variant for this panel added in [https://github.com/sdm660-mainline/linux/pull/186 sdm660-mainline/linux#186] (merged). The backlight is driven by the PM660L WLED.
+* '''Touchscreen''' - not in the packaged kernel. It works on a 7.2 test kernel with Luca Weiss' [https://lore.kernel.org/r/20260821-fp4-hx83112a-v1-0-474941bd8860@fairphone.com HX83112A touchscreen series] and the device tree node in [https://github.com/sdm660-mainline/linux/pull/241 sdm660-mainline/linux#241] (both pending upstream).
+* '''GPU''' - Adreno 512 works with freedreno.
+* '''Video (Venus)''' - the decoder and encoder devices probe. Hardware H.264 decoding through V4L2 was only tested on a 7.2 test kernel. Encoding fails: the driver always sets the H.264 8x8-transform property, which its HFI 3xx code cannot pass to the firmware, so buffer allocation fails with <code>EINVAL</code>; with that worked around, the encoder firmware crashes.
+* '''Camera and flash''' - not working. The camera subsystem (CAMSS, CCI) is disabled in the SoC device tree, the device tree describes no camera sensors, and the flash LED driver is not enabled.
+* '''Audio''' - not working, there is no sound card. The speaker amplifier (WSA881x) is connected over SoundWire, which is not supported for SDM660 yet; the earpiece, headphone jack and microphones are not described in the device tree either.
+* '''Wi-Fi and Bluetooth''' - WCN3990, both work. <code>bootmac</code> sets a MAC address derived from the serial number; with NetworkManager's default per-connection "stable" MAC, the Wi-Fi address stays the same across reboots and changes only after a reinstall. The device package does not install the Bluetooth daemon (<code>bluez</code>); most graphical user interfaces do. On a console installation, install <code>bluez</code> (on OpenRC also run <code>rc-update add bluetooth default</code>). About 20 harmless "Malformed MSFT vendor event" messages appear in the kernel log (fixed in the 7.2 branch).
+* '''Battery and charging''' - partial. The PM660 charger and BC1.2 detection work (500 mA from a computer port, 1.5 A input from a DCP charger). The <code>pmi8998_fg</code> driver only reads the fuel gauge; it does not load a battery profile or calibrate it. The percentage can jump after a reboot and is off after a full discharge until a full charge. A full battery shows 99 %, and booting with the charger connected reports "Discharging" (both fixed in the 7.2 branch). The SMB1351 parallel charger driver is pending upstream: [https://github.com/sdm660-mainline/linux/pull/241 sdm660-mainline/linux#241], [https://lore.kernel.org/r/20261021082841.79147-1-thenguyen1024@gmail.com v2 on linux-pm].
+* '''Modem''' - the modem firmware boots and <code>rmtfs</code> runs. Calls and SMS are untested; calls would also need audio. Mobile data does not work because the kernel has no IPA support for SDM660. See [[Qualcomm Snapdragon 660/630/636 (SDM660/SDM630/SDM636)|the SoC page]] for the modem status of the platform.
+* '''GPS''' - not working. There is no GNSS support for SDM660 in the kernel.
+* '''Fingerprint sensor''' - not working. There is no mainline driver for the FPC sensor; the device tree only reserves its SPI pins.
+* '''USB''' - USB 2.0 peripheral mode only; USB networking works. The device tree sets <code>dr_mode = "peripheral"</code>, so USB host/OTG does not work.
+* '''Storage''' - eMMC works. The microSD controller probes, but no card has been tested.
+* '''Sensors''' - the BMI160 accelerometer/gyroscope, the AK09918 magnetometer and the LTR579 light/proximity sensor are found through the sensor DSP (<code>qcom_smgr</code>); their readings have not been tested. Only the proximity part of the LTR579 has a driver, so the ambient light sensor does not work. The hall sensor is not described in the device tree and does not work either.
+* '''Haptics''' - the vibrator input device probes; vibration is untested.
+* '''CPU and thermals''' - there is no CPU frequency scaling on SDM660 yet, so the cores stay at the clocks set by the bootloader (about 0.6 GHz on the Gold and 1.4 GHz on the Silver cores, well below the maximum in the infobox). The firmware rejects the cluster idle states, so the CPU stays warm: about 50 °C with the screen off and the charger connected but not charging. On a 7.2 test kernel, dropping those idle states ([https://github.com/sdm660-mainline/linux/pull/240 sdm660-mainline/linux#240], pending upstream) gave about 39 °C under the same conditions; room temperature was not controlled.
+
+== A/B slots ==
+{{See also|Android AB Slots}}
+The device has A/B slots. If a slot is not marked as successful, the bootloader counts down its retry counter and then switches to the other slot; if that slot cannot boot either, the device stops in fastboot. <code>qbootctl</code>, a dependency of the device package, marks the slot as successful. Its service is enabled automatically on systemd; on OpenRC, enable it with <code>rc-update add qbootctl default</code>. If the device is already stuck in fastboot, run <code>fastboot set_active a</code> (use <code>b</code> instead if Nura was installed to slot b), then <code>fastboot reboot</code>.
+
+Nura only writes the boot image of the active slot, both when flashing and when the kernel package is upgraded. After a fresh installation, the other slot still contains the stock Android kernel, which cannot boot the Nura root filesystem. Once it has been backed up (see [[#Backing up device data|Backing up device data]]), the Nura boot image can be flashed to the other slot as well, for example with <code>pmbootstrap flasher flash_kernel --partition boot_b</code>. That copy keeps the old kernel after the next kernel upgrade until it is flashed again.
+
+== Bootloader command line ==
+The stock bootloader appends <code>skip_initramfs</code>, <code>root=/dev/dm-0</code>, <code>init=/init</code> and <code>dm="... android-verity ..."</code> to the kernel command line. The sdm660-mainline kernel renames the first three so that they have no effect ([https://github.com/sdm660-mainline/linux/commit/141b3cb0d8b4 commit 141b3cb0d8b4], enabled by <code>CONFIG_CMDLINE_DROP_DANGEROUS_ANDROID_OPTIONS</code>), and <code>dm=</code> is ignored. No verity workaround or secondary bootloader is needed.
+
+== Components ==
 {| class="wikitable"
+! Component !! Model !! Driver
 |-
-! Component !! Chip
+| SoC || Qualcomm Snapdragon 660 (SDM660) ||
 |-
-| SoC || Qualcomm Snapdragon 660 (SDM660)
+| GPU || Adreno 512 || <code>msm</code> (freedreno)
 |-
-| GPU || Adreno 512 (freedreno, zap shader <code>a512_zap.mbn</code>)
+| Display || Himax HX83112A (DJN), 1080 x 2160 || <code>panel-himax-hx83112a</code>
 |-
-| Display / Touch || Himax HX83112A (DJN), 1080x2160 — touch in-cell parked
+| Touchscreen || Himax HX83112A (I²C 0x48) || <code>himax_hx83112b</code> (HX83112A support pending upstream)
 |-
-| WiFi / Bluetooth || Qualcomm WCN3990 (ath10k <code>board-2.bin</code>)
+| PMIC || Qualcomm PM660 + PM660L ||
 |-
-| PMIC || Qualcomm PM660 + PM660L
+| Charger || PM660 || <code>qcom_smbx</code>
 |-
-| Fuel gauge || PMI8998 (<code>pmi8998_fg</code>)
+| Parallel charger || Qualcomm SMB1351 family (reports as SMB1350), I²C 0x1d || <code>qcom_smb1351</code> (pending upstream)
+|-
+| Fuel gauge || PM660 FG || <code>pmi8998_fg</code>
+|-
+| Battery || 3100 mAh, 4.40 V ||
+|-
+| Wi-Fi / Bluetooth || Qualcomm WCN3990 || <code>ath10k_snoc</code>, <code>hci_uart</code>
+|-
+| eMMC || Samsung, 64 GB || <code>sdhci-msm</code>
+|-
+| Speaker amplifier || Qualcomm WSA881x (SoundWire) || none
+|-
+| Sensors || BMI160, AK09918, LTR579 (sensor DSP) || <code>qcom_smgr</code>
+|-
+| Fingerprint || FPC || none
+|-
+| Haptics || PM660 haptics (LRA) || <code>qcom-spmi-haptics</code>
 |}
 
-== Quirks / Known issues ==
-=== Touchscreen (Himax HX83112A) — Parked ===
-Touch IC on i2c-0 (<code>c175000.i2c</code>) at '''0x48''' (irq gpio67, reset gpio66), product id
-'''0x83112a'''. The mainline <code>himax_hx83112b</code> driver only knows <code>0x83112b</code>; the wrong
-variant bound and probe failed. Parked; not needed for headless use.
-{{Todo|Add the 0x83112a chip variant to the HX83112x touch driver.}}
-
-=== microSD slot ===
-Enabled in the device tree but not yet runtime-tested (no card on hand).
-
-=== WiFi MAC address is randomised ===
-The WCN3990 has no MAC stored for mainline to read, so the WiFi interface gets a '''random MAC on every
-boot'''. WiFi itself works; if you rely on DHCP reservations, pin a fixed MAC (e.g. a NetworkManager
-<code>cloned-mac-address</code> setting or a systemd-networkd <code>.link</code> file).
-
-=== Audio ===
-Untested — not used on this headless server.
-
-=== Battery percentage inaccurate after a flat discharge ===
-<code>pmi8998_fg</code> reads state-of-charge directly from the fuel-gauge register (no DT OCV table). After a
-flat discharge the FG loses its reference until a full charge cycle recalibrates it.
-
-=== Modem (calls / SMS / data) ===
-{{Todo|Test the modem — firmware is present but calls/SMS/data are untested.}}
-
-=== Dropped to fastboot after running flat ===
-A/B device: if the active slot is not marked "successful", the bootloader decrements its retry counter each
-power-cycle and eventually lands in fastboot. Recovery: <code>fastboot set_active a && fastboot reboot</code>.
-Fixed permanently by the <code>qbootctl</code> dependency.
-
-== Notes ==
-* Display works through the real DPU + DSI + panel pipeline. The mainline <code>panel-himax-hx83112a</code>
-  (Fairphone 3, 1080x2340) was extended with a <code>djn,a1-hx83112a</code> 1080x2160 variant for this device.
-* WiFi/BT use the same WCN3990 as the Mi A2; the firmware (<code>board-2.bin</code>) lives in the rootfs
-  (<code>firmware-vsmart-zangyapro</code>), so it is absent during <code>fastboot boot</code> probes.
-
 == See also ==
-* [[Xiaomi Mi A2 (xiaomi-jasmine_sprout)]] — same SoC, shared kernel
-* [[Help:Device Page]]
-* [https://app.element.io/#/room/#sdm660-mainline:matrix.org Chat room: SDM660 devices development]
-* [https://github.com/sdm660-mainline/linux Kernel source (sdm660-mainline/linux)] — series '''merged''' into <code>qcom-sdm660-7.0.y</code> ([https://github.com/sdm660-mainline/linux/pull/186 PR #186], 2026-06-20)
-* [https://github.com/fudio101/active1-pmos Port working tree (fudio101/active1-pmos)]
+{{Special:PrefixIndex/{{FULLPAGENAME}}/}}
+* {{MR|9720|pmaports}} Initial merge request
+* [https://github.com/sdm660-mainline/linux sdm660-mainline/linux] - kernel source
+* [https://github.com/sdm660-mainline/linux/pull/186 sdm660-mainline/linux#186] - device tree and panel support (merged)
+* [https://github.com/sdm660-mainline/linux/pull/241 sdm660-mainline/linux#241] - touchscreen and SMB1351 charger (open)
+* [https://lore.kernel.org/r/20261021082841.79147-1-thenguyen1024@gmail.com SMB1351 charger driver v2] on linux-pm
+* [[Xiaomi Mi A2 (xiaomi-jasmine_sprout)]] - device tree base
+* {{Matrix channel|#sdm660-mainline:matrix.org}} - SDM660 mainline chat
+* [https://github.com/fudio101/active1-pmos fudio101/active1-pmos] - port notes
