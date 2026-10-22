@@ -49,8 +49,10 @@ bytes 10–11; the `ff` entry also differs in byte 15 (`03` vs `00`). Everything
 What byte 12 means, and who changed it, is not known.
 
 This file is **not** linux-firmware's `ath10k/WCN3990/hw1.0/board-2.bin`: that one is a different
-867 KB table for Pixel/Dragonboard/Lenovo boards whose `qmi-board-id=ff` entry carries other RF data
-and causes MSS watchdog crashes on SDM660 (pmaports issue #3803).
+867 KB table for Pixel/Dragonboard/Lenovo boards whose `qmi-board-id=ff` entry carries other RF data.
+During the port (2026-06) using it was seen to end in MSS watchdog crashes on this phone; that was not
+re-tested since. pmaports issue #3803, cited here before, is an unrelated miatoll (SM7125) WiFi crash and
+is not a source for this.
 
 **Inspect entries:**
 ```sh

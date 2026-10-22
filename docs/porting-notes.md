@@ -16,7 +16,7 @@ for the open items.
   previously thought broken, now works on a healthy battery — see the reboot note below.)
 - **Firmware:** `firmware-vsmart-zangyapro` (hard dep of `device-vsmart-zangyapro`) provides:
   `board-2.bin` (WCN3990 RF-calibration, self-hosted in `vendor-blobs/` — linux-firmware's copy
-  crashes SDM660, pmaports #3803), `a512_zap.mbn` (Adreno 512 zap, TheMuppets fetch),
+  was seen to crash the MSS on this phone in 2026-06, not re-tested; pmaports #3803 is unrelated), `a512_zap.mbn` (Adreno 512 zap, TheMuppets fetch),
   `firmware-5.bin` (generated at build by `ath10k-fwencoder`). `wlanmdsp.mbn` comes from the
   phone's own modem partition via `msm-firmware-loader`, so `linux-firmware-ath10k` is not needed. Adreno a530 microcode from `firmware-qcom-adreno-a530`.
   Full provenance: `vendor-blobs/README.md`.
