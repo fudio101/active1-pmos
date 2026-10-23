@@ -162,9 +162,11 @@ driver, no idle-state fix), and `--prune` would remove the profile. Mitigations 
   panel driver. Because of `flash_kernel_on_update`, it was also written to `boot_a` straight away.
   Fix: right after the upgrade and **before rebooting**, `apk add --allow-untrusted` the local
   build again (its version must be higher than the repo's).
-- The kernel, device, firmware and profile packages are pinned by checksum (`><Q1…`) in
-  `/etc/apk/world`, from installing the local apks (seen 2026-10-13 and 2026-10-22). A restore
-  (`restore_configs.sh`) strips those pins.
+- The kernel and profile packages are pinned by checksum (`><Q1…`) in `/etc/apk/world`, from
+  installing the local apks. A restore (`restore_configs.sh`) strips those pins. The device and
+  firmware packages were pinned the same way until 2026-10-23, when they were unpinned to follow
+  pmaports: the installed 1-r0 builds match the repo's, so apk kept them and will upgrade them
+  normally.
 - An upgrade that includes openssh can leave the running sshd resetting every new connection
   (`kex_exchange_identification: Connection reset by peer`). Keep the session that ran `apk`
   open, and run `sudo systemctl restart sshd` when it finishes.

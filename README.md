@@ -109,10 +109,11 @@ upstream, the staging copies in this repo stop being the source of truth and sta
       `apk upgrade -a` warning and rewrite what the warning now means.
 - [x] `docs/porting-notes.md` "Protecting the local packages from apk": "absent from any public
       repo" and "or upstreaming to pmaports" both become false.
-- [ ] Drop the three pinned packages from `/etc/apk/world` on the device and switch to the
-      upstream ones. **Do this deliberately, on a charger, with a backup** — it replaces the
-      running kernel.
-- [ ] Update `CLAUDE.md`: the "three local packages pinned" safety rule no longer applies.
+- [x] Device and firmware follow upstream — done 2026-10-23: their checksum pins were dropped
+      from `/etc/apk/world`. The installed 1-r0 builds match the repo's, so nothing was
+      reinstalled. The kernel and the server profile stay pinned: the packaged 7.0.14 kernel
+      lacks touch, the SMB1351 driver and the idle-state fix.
+- [x] Update `CLAUDE.md`: the pin rule now covers only the kernel and the profile.
 
 ## Environment notes
 
