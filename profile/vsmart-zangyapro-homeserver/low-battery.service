@@ -1,0 +1,14 @@
+[Unit]
+Description=Power off before a power cut drains the battery flat (headless server profile)
+After=sysinit.target
+
+[Service]
+Type=simple
+# Override with a drop-in, e.g. Environment=LOWBAT_PCT=10
+Environment=LOWBAT_PCT=5 LOWBAT_MV=3400 LOWBAT_INTERVAL=60
+ExecStart=/usr/libexec/vsmart-zangyapro-homeserver/low-battery
+Restart=on-failure
+RestartSec=30
+
+# No [Install]: the package enables it with its own multi-user.target.wants symlink
+# in /usr/lib, so it is "static" and starts on every boot without any enable step.

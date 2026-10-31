@@ -5,7 +5,7 @@
 #   apk add --allow-untrusted vsmart-zangyapro-homeserver-*.apk
 pkgname=vsmart-zangyapro-homeserver
 pkgver=1
-pkgrel=12
+pkgrel=13
 pkgdesc="Vsmart Active 1 server profile: headless home-server policy (local, not upstream)"
 url="https://github.com/fudio101/active1-pmos"
 arch="noarch"
@@ -26,6 +26,8 @@ source="
 	charge-limit.service
 	console-blank
 	console-blank.service
+	low-battery
+	low-battery.service
 	nm-wifi-mac.conf
 	smb1351-setup
 	smb1351-setup.service
@@ -52,6 +54,13 @@ package() {
 	install -Dm755 "$srcdir"/charge-limit "$pkgdir"/usr/libexec/$pkgname/charge-limit
 	install -Dm644 "$srcdir"/charge-limit.service "$sd"/$pkgname-charge-limit.service
 	ln -s ../$pkgname-charge-limit.service "$sd"/multi-user.target.wants/
+
+	# Power off at 5 % on battery (or under 3.40 V), so a long power cut does not run the
+	# battery down to the PMIC cutoff (~2.6 V). Whether power coming back boots the phone after
+	# this clean poweroff is not confirmed yet (see the script).
+	install -Dm755 "$srcdir"/low-battery "$pkgdir"/usr/libexec/$pkgname/low-battery
+	install -Dm644 "$srcdir"/low-battery.service "$sd"/$pkgname-low-battery.service
+	ln -s ../$pkgname-low-battery.service "$sd"/multi-user.target.wants/
 
 	# Configure the SMB1351 parallel charger like stock (enable pin active high, float 4.40 V).
 	# Kernels without a driver for it leave it on OTP defaults: always enabled with a 4.50 V
@@ -99,6 +108,8 @@ e976718b6bf4a67a090273a293931c68ac55dedf294a9cca22997c636da5a1ddaf619df4ea1acdf4
 8131274ce731acd98fee8b387681fcdcb2fd25bce35372daa8d7718dd7e4ebabd6363371fba6fc5b96453df5f241cf6acee48d16eb4a79fe4735d79fb17b3240  charge-limit.service
 cf39bab2196ac8fe56d168bc519954db7b742b8cefa2fddf65f1a6304d42eddd45fa1f9009287fab96af0836728df0c4955683f857e8518b1d14f03665e7f754  console-blank
 9e6652f5b13a0fba11dab76af728526bc5fd655fbc51547987c7ed7d57154f6b364509e7ab2caee2ef00e3af9012910b76511291005756aa4fbcfe9c73a446ef  console-blank.service
+cc5d67f5361136a653d9f9b78e7c61ee65a9e1b01a7dd39fe0c2950c3f5a5b5694a2566b0cac54be34aece5afc60d49210d24704953f478e06204291e7fc03c9  low-battery
+b548ef66e9e88966ef83db6f0c5d208de4c7b70de6e0465420e0e1e82f029b4b38e21baa88d0eeed35d245c09566e8ec5ba19fa00b557d1ad34f3b13c54d7005  low-battery.service
 f1a001de09672f1ea68cd4e11970ec1374e26071ebfb1a34edbf9babadd406e3465620ed06cdae53e567ecf073b690f77b75728d94d32c52ac54447f6a00a169  nm-wifi-mac.conf
 8c1f8d43af842cc17463c9b7188055c5d1ed7ba794cae4de2dc820a1229915aec44afce78f1652de4b24593176acb0c67e85b05d3174f1eabfdb175e64e1db78  smb1351-setup
 9c84a6615c23ad4bba05a98c3a7a38d93d1933ece2e3cc5d1b3f32603a01fca05620bae06c27c23babedf6b736d56dee272f772004782c7ce8dc60fb10340927  smb1351-setup.service

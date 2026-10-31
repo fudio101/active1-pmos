@@ -1,0 +1,38 @@
+#!/bin/sh
+# Power off cleanly before a power cut drains the battery flat. Nothing else does that here
+# (no upower), so on battery the phone runs until the PMIC cuts it off at about 2.6 V, a deep
+# discharge that wears the battery. In the power cuts of 2026-10-27..29 the gauge reached 0 %
+# 10-30 min before that cutoff, and 5 % 20-50 min before it.
+#
+# With no USB power it powers off once the battery is at or below PCT percent, or under MV
+# millivolts on two readings in a row (a single reading can dip under load). After a PMIC
+# cutoff, power coming back boots the phone (ABL passes androidboot.mode=charger, which pmOS
+# ignores). Not confirmed yet after this clean poweroff: it may need the power button.
+PCT="${LOWBAT_PCT:-5}"
+MV="${LOWBAT_MV:-3400}"
+INTERVAL="${LOWBAT_INTERVAL:-60}"
+BAT=/sys/class/power_supply/qcom-battery
+USB=/sys/class/power_supply/pm660-charger/online
+
+poweroff_now() {
+	echo "low-battery: on battery at $1, powering off"
+	systemctl poweroff
+}
+
+echo "low-battery: powering off on battery at <= $PCT% or < $MV mV"
+low=0
+while :; do
+	cap=$(cat "$BAT"/capacity 2>/dev/null)
+	uv=$(cat "$BAT"/voltage_now 2>/dev/null)
+	if [ "$(cat "$USB" 2>/dev/null)" = 1 ] || [ -z "$cap" ] || [ -z "$uv" ]; then
+		low=0
+	elif [ "$cap" -le "$PCT" ]; then
+		poweroff_now "$cap% ($((uv / 1000)) mV)"
+	elif [ $((uv / 1000)) -lt "$MV" ]; then
+		low=$((low + 1))
+		[ "$low" -ge 2 ] && poweroff_now "$((uv / 1000)) mV ($cap%)"
+	else
+		low=0
+	fi
+	sleep "$INTERVAL"
+done
