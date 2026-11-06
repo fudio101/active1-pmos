@@ -56,8 +56,7 @@ package() {
 	ln -s ../$pkgname-charge-limit.service "$sd"/multi-user.target.wants/
 
 	# Power off at 5 % on battery (or under 3.40 V), so a long power cut does not run the
-	# battery down to the PMIC cutoff (~2.6 V). Whether power coming back boots the phone after
-	# this clean poweroff is not confirmed yet (see the script).
+	# battery down to the PMIC cutoff (~2.6 V). Power coming back boots it again by itself.
 	install -Dm755 "$srcdir"/low-battery "$pkgdir"/usr/libexec/$pkgname/low-battery
 	install -Dm644 "$srcdir"/low-battery.service "$sd"/$pkgname-low-battery.service
 	ln -s ../$pkgname-low-battery.service "$sd"/multi-user.target.wants/
@@ -108,7 +107,7 @@ e976718b6bf4a67a090273a293931c68ac55dedf294a9cca22997c636da5a1ddaf619df4ea1acdf4
 8131274ce731acd98fee8b387681fcdcb2fd25bce35372daa8d7718dd7e4ebabd6363371fba6fc5b96453df5f241cf6acee48d16eb4a79fe4735d79fb17b3240  charge-limit.service
 cf39bab2196ac8fe56d168bc519954db7b742b8cefa2fddf65f1a6304d42eddd45fa1f9009287fab96af0836728df0c4955683f857e8518b1d14f03665e7f754  console-blank
 9e6652f5b13a0fba11dab76af728526bc5fd655fbc51547987c7ed7d57154f6b364509e7ab2caee2ef00e3af9012910b76511291005756aa4fbcfe9c73a446ef  console-blank.service
-cc5d67f5361136a653d9f9b78e7c61ee65a9e1b01a7dd39fe0c2950c3f5a5b5694a2566b0cac54be34aece5afc60d49210d24704953f478e06204291e7fc03c9  low-battery
+a15d2507b4bf9da8182add9b04e9452fce0fdb6505e4514ceb774b4c67c9c5ba86714ca32e36d2f60cf60aefd2d13931a09bb8be835a427b9a659c0fd0e3f34d  low-battery
 b548ef66e9e88966ef83db6f0c5d208de4c7b70de6e0465420e0e1e82f029b4b38e21baa88d0eeed35d245c09566e8ec5ba19fa00b557d1ad34f3b13c54d7005  low-battery.service
 f1a001de09672f1ea68cd4e11970ec1374e26071ebfb1a34edbf9babadd406e3465620ed06cdae53e567ecf073b690f77b75728d94d32c52ac54447f6a00a169  nm-wifi-mac.conf
 8c1f8d43af842cc17463c9b7188055c5d1ed7ba794cae4de2dc820a1229915aec44afce78f1652de4b24593176acb0c67e85b05d3174f1eabfdb175e64e1db78  smb1351-setup

@@ -5,9 +5,9 @@
 # 10-30 min before that cutoff, and 5 % 20-50 min before it.
 #
 # With no USB power it powers off once the battery is at or below PCT percent, or under MV
-# millivolts on two readings in a row (a single reading can dip under load). After a PMIC
-# cutoff, power coming back boots the phone (ABL passes androidboot.mode=charger, which pmOS
-# ignores). Not confirmed yet after this clean poweroff: it may need the power button.
+# millivolts on two readings in a row (a single reading can dip under load). Power coming
+# back boots the phone again by itself: ABL passes androidboot.mode=charger, which pmOS
+# ignores (seen after all 9 such poweroffs in the power cuts of 2026-10-31..11-06).
 PCT="${LOWBAT_PCT:-5}"
 MV="${LOWBAT_MV:-3400}"
 INTERVAL="${LOWBAT_INTERVAL:-60}"
